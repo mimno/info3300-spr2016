@@ -1,0 +1,83 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<style>
+	body { font-family: "Open Sans"; }
+	div { margin: 30px; }
+	#target { font-size: 128; }
+	</style>
+</head>
+<body>
+	<h3>Prompt for Friday, Jan. 29. What's different about Javascript?</h3>
+	<div>
+		At the end of each class I'm going to post a "prompt" for the next class. This one will be the basis for our discussion on Friday. As we build up complexity during the semester, these will start to look more like templates for  mini-projects.
+	</div>
+
+	<div>
+		This class will work almost entirely in Javascript. There are several idioms in Javascript that we'll use a lot, but that you may not be familiar with from other languages. For some of things we will use additional libraries, but we want to do things the hard way first!
+	</div>
+	<div>
+		Javascript has a simple type system. The <tt>typeof</tt> function can tell us the type of a variable. 
+		<div id="target"></div>
+
+<script>
+
+function getType(x) { return typeof(x); }
+function bold(x) { return "<b>" + x + "</b>"; }
+
+// The first argument can be any variable, the second must be a function.
+function display (variable, modifier) {
+	document.getElementById("target").innerHTML =
+	  variable + " " + modifier(variable);
+}
+display(3.0, getType);
+</script>
+	</div>
+	
+	<h3>Discussion</h3>
+	<div>What do you think of the barplot on this page?
+		<a href=" http://www.citylab.com/politics/2016/01/as-voter-id-laws-expand-fewer-people-are-getting-drivers-licenses/431547/">Drivers licenses by age, over time</a>.
+		What do the authors want to tell you? How are they choosing
+		to represent numbers visually? How easy is it to compare two numbers?
+		Would other ways of displaying the same data highlight other
+		aspects? Is there something weird about the dates?
+	</div>
+		<h3>Further examples of javascript function patterns, which might be useful on homework.</h3>
+	<div>
+		Javascript is functional, which means that functions are values. There are two different ways of defining functions.
+		<span id="functions"></span>
+		<script>
+		function plusOne(x) { return x + 1; }
+		
+		var addOneAlternate = function(x) { return x + 1; };
+		</script>
+	</div>
+	<div>
+		Some functions take other functions as inputs. Other functions return functions.
+		<span id="func_as_input"></span>
+		<span id="func_as_output"></span>
+		<script>
+		var operate = function(x, operator) { return operator(x); }
+		document.getElementById("func_as_input").innerHTML = operate(7, plusOne);
+		
+		var plusGenerator = function(offset) { return function(x) { return x + offset } };
+		var addTwo = plusGenerator(2);
+		document.getElementById("func_as_output").innerHTML = addTwo(15);
+		
+		</script>
+	</div>
+	<div>
+		Functions remember the values of variables at the time they were created.
+		<script>
+		var favoriteColor = "blue";
+		function colorGenerator(color) {
+			return function () { return color; };
+		}
+		var getColor = colorGenerator(favoriteColor);
+		favoriteColor = "green";
+		
+		// What is getColor() ?
+		</script>
+	</div>
+</body>
+</html>
