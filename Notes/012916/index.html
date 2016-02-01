@@ -30,11 +30,12 @@ typeof(Math.PI);
 typeof("Ithaca");
 typeof('i');
 
+// Note: to get this to work you may need to specify View -> Encoding -> UTF-8.
 var hello = "你好"; // Any unicode character is valid in a string literal.
 var 你好 = "hello"; // Any LETTER unicode character is valid as the start of a variable name
 
 var smiley =  "😀";  // Yes! Emojis are Unicode characters.
-var 😀 = "smiley"; // NO! But they are a different type of character than letters.
+// var 😀 = "smiley"; // NO! But they are a different type of character than letters.
 
 // Strings have functions. Chrome gives you a nice summary.
 if ("Ithaca".endsWith("a")) {
