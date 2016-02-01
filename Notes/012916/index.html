@@ -1,0 +1,135 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<style>
+	body { font-family: "Open Sans"; }
+	div { margin: 30px; }
+	#target { font-size: 128; }
+	</style>
+</head>
+<body>
+	<h3>Notes for Friday, Jan. 29. What's different about Javascript?</h3>
+
+	<div>
+		This class will work almost entirely in Javascript. There are several idioms in Javascript that we'll use a lot, but that you may not be familiar with from other languages. For some of things we will use additional libraries, but we want to do things the hard way first!
+	</div>
+	<div>
+		Javascript has a simple type system. The <tt>typeof</tt> function can tell us the type of a variable. 
+		<div id="target"></div>
+
+<script>
+
+// Here's how we declare a variable:
+var x = 3.1;
+
+// JS doesn't distinguish between integers and floating point numbers.
+typeof(3);
+typeof(Math.PI);
+
+// Strings are a type, but characters aren't.
+typeof("Ithaca");
+typeof('i');
+
+var hello = "你好"; // Any unicode character is valid in a string literal.
+var 你好 = "hello"; // Any LETTER unicode character is valid as the start of a variable name
+
+var smiley =  "😀";  // Yes! Emojis are Unicode characters.
+var 😀 = "smiley"; // NO! But they are a different type of character than letters.
+
+// Strings have functions. Chrome gives you a nice summary.
+if ("Ithaca".endsWith("a")) {
+	console.log("It does");
+}
+// Also, that's how you do a conditional and write to the console (good for debugging).
+
+// Other types are booleans
+typeof("Ithaca".endsWith("a"));
+
+// Javascript Object Notation (JSON) is a great way to send structured data between programs.
+// Most languages support it, but valid JSON also happens to be valid Javascript.
+//   http://www.json.org
+
+var myArray = [ 1, 2, "big" ];  // Notice that arrays are not typed. (They CAN be, but only if you ask.)
+var myObject = { x : 3, y : "😀", z : myArray };  // Property names must be strings, values can be anything.
+
+// There's no way (in this version of JS) to ask an object to list its property names.
+// We use this function in the Object class:
+Object.getOwnPropertyNames([1, 2, 3]);
+
+// Note that arrays are implemented as objects with fancy properties and some syntactic "sugar".
+console.log(myArray[2]);
+console.log(myArray["2"]);
+
+// More syntactic help. You can write regular expressions like this:
+var pattern = /[aeiou]/g;
+console.log("ithaca".replace(pattern, "V"));
+// But regexps are still just objects!
+
+// Here's the really important type: function.
+
+function getType(x) { return typeof(x); }
+function bold(x) { return "<b>" + x + "</b>"; }
+
+typeof(getType);
+
+// The first argument can be any variable, the second must be a function.
+function display (variable, modifier) {
+	document.getElementById("target").innerHTML =
+	  variable + " " + modifier(variable);
+}
+
+// Since functions are values, we can pass them as arguments.
+display(3.0, getType);
+
+// Usually when we pass a function as an argument we want to change a behavior.
+// Try changing "getType" to "bold".
+</script>
+	</div>
+	
+	<h3>Discussion</h3>
+	<div>What do you think of the barplot on this page?
+		<a href=" http://www.citylab.com/politics/2016/01/as-voter-id-laws-expand-fewer-people-are-getting-drivers-licenses/431547/">Drivers licenses by age, over time</a>.
+		What do the authors want to tell you? How are they choosing
+		to represent numbers visually? How easy is it to compare two numbers?
+		Would other ways of displaying the same data highlight other
+		aspects? Is there something weird about the dates?
+	</div>
+		<h3>Further examples of javascript function patterns, which might be useful on homework.</h3>
+	<div>
+		Javascript is functional, which means that functions are values. There are two different ways of defining functions.
+		<span id="functions"></span>
+		<script>
+		function plusOne(x) { return x + 1; }
+		
+		var addOneAlternate = function(x) { return x + 1; };
+		</script>
+	</div>
+	<div>
+		Some functions take other functions as inputs. Other functions return functions.
+		<span id="func_as_input"></span>
+		<span id="func_as_output"></span>
+		<script>
+		var operate = function(x, operator) { return operator(x); }
+		document.getElementById("func_as_input").innerHTML = operate(7, plusOne);
+		
+		var plusGenerator = function(offset) { return function(x) { return x + offset } };
+		var addTwo = plusGenerator(2);
+		document.getElementById("func_as_output").innerHTML = addTwo(15);
+		
+		</script>
+	</div>
+	<div>
+		Functions remember the values of variables at the time they were created.
+		<script>
+		var favoriteColor = "blue";
+		function colorGenerator(color) {
+			return function () { return color; };
+		}
+		var getColor = colorGenerator(favoriteColor);
+		favoriteColor = "green";
+		
+		// What is getColor() ?
+		</script>
+	</div>
+</body>
+</html>
