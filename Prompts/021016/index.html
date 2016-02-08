@@ -1,0 +1,42 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<style>body { font-family: "Open Sans"; } div { margin: 30px; }</style>
+</head>
+<body>
+<h3>Prompt for Wednesday, Feb 10. D3 axes, Calculating &pi;.</h3>
+
+<svg height="200" width="200"></svg>
+
+<div>A scale is an abstract mapping from data to aesthetics. Scales are closely related to guides and axes. Here's an example of a useful d3 tool for building axes for position scales. We'll use it to create a stochastic estimate of &pi;.</div>
+<div>
+<script>
+var svg = d3.select("svg");
+var height = svg.attr("height");
+var width = svg.attr("width");
+var xScale = d3.scale.linear().domain([-1,1]).range([0, width]);
+var yScale = d3.scale.linear().domain([-1,1]).range([height, 0]);
+
+var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+svg.append("g").attr("class", "axis")
+.call(xAxis);
+
+var randomPoints = function () {
+	return { x: Math.random() * 2 - 1,
+			 y: Math.random() * 2 - 1 };
+};
+
+var insideCircle = function (point) {
+	return point.x * point.x + point.y * point.y < 1.0;
+};
+
+var numPoints = 0;
+var numPointsInside = 0;
+
+</script>
+</div>
+<h3>Example Projects from Previous Years</h3>
+</body>
+</html>
