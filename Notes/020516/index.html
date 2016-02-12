@@ -1,0 +1,88 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<style>body { font-family: "Open Sans"; } div { margin: 30px; }</style>
+</head>
+<body>
+	<h3>Notes for Friday, Feb. 5. Arrays. Introduction to D3</h3>
+
+<!-- Here's a standard HTML div element with an ID and a class -->
+<div id="d1" class="header">Hello!</div>
+
+<!-- Here's an SVG canvas element. Note that in this file it looks like the <div> above. -->
+<svg height="200" width="200">
+  <!-- Visual elements are represented by tags, which have attributes -->
+</svg>
+
+	<div>
+		We'll start by using d3 to select DOM elements, create new elements, and modify the content and appearance of elements. 
+	</div>
+	<div>
+		1. How can we select elements? What is the difference between select() and selectAll()?
+<script>
+// d3.select grabs the first element that matches the query.
+console.log(d3.select("div"));
+
+// selectAll grabs multiple elements. This one returns three <div>s -- why not all of them?
+console.log(d3.selectAll("div"));
+
+// Get by class using dot, get by id using hash.
+console.log(d3.selectAll(".header"));
+</script>
+	</div>
+	<div>
+		2. How can we create new elements, and set their attributes and styles?
+<script>
+var svg = d3.select("svg");
+
+// From a selection we can easily create new SVG elements
+svg.append("circle").attr("r", 10);
+// Note that we can "chain" multiple functions. "attr" sets attributes.
+
+// Here's an easy way to get an array of words.
+var text = "The quick brown fox jumps over the lazy dog";
+var tokens = text.split(" ");
+
+// An example of a c-style for loop.
+for (var i = 0; i < tokens.length; i++) {
+	svg.append("text").text(tokens[i])
+	.attr("x", Math.random() * svg.attr("width"))
+	.attr("y", Math.random() * svg.attr("height"));
+}
+
+// Now the same thing using a functional-style for loop.
+tokens.forEach(function (word) {
+	svg.append("text").text(word)
+	.attr("x", Math.random() * svg.attr("width"))
+	.attr("y", Math.random() * svg.attr("height"));
+});
+
+</script>
+	</div>
+	<div>
+		3. How do we update the attributes of existing elements? 
+<script>
+// From a d3 selection we can set attributes and CSS styles.
+svg.select("circle")
+.attr("cx", 133)
+.attr("cy", 100)
+.attr("r", 50)
+.style("fill", "#00f")
+.style("opacity", 0.25);
+
+// We can also set a value for multiple elements all at once.
+svg.selectAll("text").style("fill", "#f00");
+</script>
+	</div>
+	
+	<h3>Gravitational covers, Jan Willem Tulp</h3>
+	<div>
+		The <a href="https://lab.interactivethings.com/galaxy-of-covers/">Galaxy of Covers</a> shows information about the most commonly covered songs. We've been thinking of graphics as ways of transforming tables of data into visual elements. What are the "scales" that this tool is using? How effective are they? What do you notice first, and how accurately could you reconstruct the original data table?
+	</div>
+	<div>
+		I heard about this via Twitter from designer Jan Willem Tulp, who has a 
+		great <a href="http://www.visualisingdata.com/2015/12/six-questions-with-jan-willem-tulp/">interview with Andy Kirk</a>. Both of them are worth paying attention to!
+	</div>
+</body>
+</html>
