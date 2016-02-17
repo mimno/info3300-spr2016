@@ -1,0 +1,136 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<style>
+	body { font-family: "Open Sans"; }
+	div { margin: 30px; }
+	svg { background-color: #eee; }
+	.axis path { fill: none; stroke: black; }
+	.axis line { stroke: black; }
+	.axis text { font-size: 10pt; }
+	path.outline { fill: none; stroke-width: 5; stroke: white; }
+	path.plot { fill: none; stroke-width: 3; }
+	</style>
+</head>
+<body>
+<h3>Prompt for Wednesday, Feb 17. Line plots, Harry Potter books, Projects.</h3>
+
+<svg height="200" width="300"></svg>
+
+<div>
+Line plots are one of the most popular methods for showing sequential numerical data. Here we'll look at a useful d3 function for creating &lt;path&gt; elements from a data array.
+</div>
+<div>
+<script>
+	// Source: http://harrypotter.answers.wikia.com/wiki/How_many_pages_is_the_harry_potter_book
+var harryPotterPages = [
+	{ book: 1, uk: 223, us: 309 },
+	{ book: 2, uk: 251, us: 341 },
+	{ book: 3, uk: 317, us: 435 },
+	{ book: 4, uk: 636, us: 743 },
+	{ book: 5, uk: 766, us: 870 },
+	{ book: 6, uk: 607, us: 652 },
+	{ book: 7, uk: 607, us: 759 }
+];
+		
+var svg = d3.select("svg");
+var height = svg.attr("height");
+var width = svg.attr("width");
+
+var padding = 30;
+var xScale = d3.scale.linear().domain([1, 7]).range([padding, width]);
+var yScale = d3.scale.linear().domain([0, 900]).range([height - padding, 0]);
+
+// We're adding a standard axis, but the default style doesn't know that
+//  books don't come in 0.5 intervals. How can we set the correct number?
+// This is one way, but try modifying the domain of the x scale and looking
+//  for other ways to specify tick mark locations in the d3 documentation.
+var xAxis = d3.svg.axis().scale(xScale).orient("bottom")
+.ticks(5);
+var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+svg.append("g").attr("transform", "translate(0," + (height - padding) + ")").attr("class", "axis")
+.call(xAxis);
+svg.append("g").attr("transform", "translate(" + padding + ",0)").attr("class", "axis")
+.call(yAxis);
+
+// Create a d3 line() function. This function will take an array of
+//  data objects and return a path through a series of x,y pixel coordinates.
+// We need to tell it how to translate each data element into an x and
+//  a y pixel value. We'll do this using the "pass a function as an argument"
+//  pattern that is now familiar to us.
+
+var ukLine = d3.svg.line()
+.x(function (d) { return xScale(d.book); })
+.y(function (d) { return yScale(d.uk); });
+
+// and use it to add a path. I'm going to add a slightly wider white 
+//  path underneath the red path to give it more visual distinction and
+//  highlight crossing points. (Try modifying the data values to make
+//  the lines cross.)
+svg.append("path").attr("d", ukLine(harryPotterPages))
+.attr("class", "outline").attr("stroke", "white");
+svg.append("path").attr("d", ukLine(harryPotterPages))
+.attr("class", "plot").attr("stroke", "red");
+
+var usLine = d3.svg.line()
+.x(function (d) { return xScale(d.book); })
+.y(function (d) { return yScale(d.us); });
+
+svg.append("path").attr("d", usLine(harryPotterPages))
+.attr("class", "outline").attr("stroke", "white");
+svg.append("path").attr("d", usLine(harryPotterPages))
+.attr("class", "plot").attr("stroke", "blue");
+
+
+// When we are interested in displaying an accumulation of something,
+//  like government debt or construction jobs, an area plot is often a good
+//  alternative to a line plot. The only difference is that for each 
+//  x value we have *two* y values: the top of the area and the bottom
+//  of the area. So instead of .y() we have .y0() and .y1().
+// In this case we'll use a trivial constant bottom y value so our area
+//  starts at 0. If we wanted to do a stacked area plot (streamgraph,
+//  river diagram), we might want to set both of these to data-specific
+//  values. BUT remember that streamgraphs are REALLY hard to read
+//  because our eyes have trouble distinguishing variation from the 
+//  constitutent streams.
+
+var ukArea = d3.svg.area()
+.x(function (d) { return xScale(d.book); })
+.y0(function (d) { return yScale(0); })
+.y1(function (d) { return yScale(d.uk); });
+
+svg.append("path").attr("d", ukArea(harryPotterPages))
+.style("fill", "red")
+.style("opacity", 0.25)
+.style("stroke", "red");
+
+
+</script>
+</div>
+
+<h3>Discussion: Projects, Data vis Zoo</h3>
+<div>
+	Yes, we know you <a href="http://www.buzzfeed.com/lyapalater/group-projects-should-be-wiped-off-the-face-o">hate group projects</a>. (There are at least seven others like that just on Buzzfeed.)
+</div>
+<div>
+	<p>How to do well on group projects (and life).</p>
+	
+	<p>Communicate. Reply to messages. Tell people when they are not following the terms of your agreement. The strongest correlation to group success is NOT skill or experience, it's showing that you are listening.</p>
+
+	<p>Work together. Avoid the "three mini projects stapled together" trap. Share your opinions, learn from each other. If one member is taking the lead on something, they are counting on you to make their work better.</p>
+
+	<p>Plan to explore. Your first idea will not work. You will need to iterate.</p>
+
+	<p>Start now. Data collection and integration will take most of your time. Everything will be harder than you think. Matching your schedules is hard, and can manifest itself as AWOL group members.</p>
+
+	<p>Processes: Contracts. Weekly reports from each member, commenting on any issues, estimating other members' contributions.</p>
+	
+</div>
+<div>
+	Heer, Bostock and Ogievetsky's <a href="http://queue.acm.org/detail.cfm?id=1805128">Tour through the Visualization Zoo</a>.
+</div>
+
+</body>
+</html>
