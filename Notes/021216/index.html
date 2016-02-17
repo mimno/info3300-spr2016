@@ -1,0 +1,100 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<style>body { font-family: "Open Sans"; } div { margin: 30px; }
+	svg { background-color: #eee; }
+	.axis path { fill: none; stroke: #aaa;}
+	.axis line { stroke: #aaa; }
+	.axis text { fill: #aaa; font-size: .7em; }
+	</style>
+</head>
+<body>
+<h3>Notes for Wednesday, Feb 12. D3 axes, Calculating &pi;.</h3>
+
+<svg height="200" width="200"></svg>
+
+<div>A scale is an abstract mapping from data to aesthetics. Scales are closely related to guides and axes. Here's an example of a useful d3 tool for building axes for position scales. We'll use it to create a stochastic estimate of &pi;.</div>
+<div>
+<script>
+var svg = d3.select("svg");
+var height = svg.attr("height");
+var width = svg.attr("width");
+
+// The area of a 2x2 square is four, the area of the radius 1 circle that fits in that square
+//  is pi. We can sample points uniformly from a square region using Math.random(). The probability
+//  that one of those random points in the square is also inside the circle is pi / 4.
+// Here's the subtle but important point: if we collect a large number of independent samples of
+//  points in that square, the *empirical* proportion of points inside the circle should converge
+//  to pi / 4.
+
+// Set the domain of the scale so that we can see the region outside the -1,1 square.
+var xScale = d3.scale.linear().domain([-1.3,1.3]).range([0, width]);
+var yScale = d3.scale.linear().domain([-1.3,1.3]).range([height, 0]);
+
+// A d3 axis is a function that takes a scale function and creates
+//  a set of SVG objects that form a "guide" for that scale.
+var xAxis = d3.svg.axis().scale(xScale)
+.orient("bottom");
+
+// We'll create a group <g> tag so that we can move several elements at
+//  the same time.
+svg.append("g").attr("class", "axis")
+.attr("transform", "translate(0," + yScale(0) + ")")
+.call(xAxis);
+// Use your browser's element inspector to figure out what just happened. 
+//  The default styles for path and line elements are not good for this case.
+// What should we use?
+
+// Grab a random point, scale it (by two), and then translate it (by -1).
+var randomPoint = function () {
+	return { x: Math.random() * 2 - 1,
+			 y: Math.random() * 2 - 1 };
+};
+
+// Return a boolean. Why do I not need a Math.sqrt? 
+var insideCircle = function (point) {
+	return point.x * point.x + point.y * point.y < 1.0;
+};
+
+// Set the number of points to sample
+var numPoints = 1000;
+var numPointsInside = 0;
+
+for (var i = 0; i < numPoints; i++) {
+	var point = randomPoint();
+	if (insideCircle(point)) {
+		numPointsInside++;
+	}
+	
+	// Here I'll add a new visual element to go along with the data element, 
+	//  and set some aesthetic properties based on its position.
+	svg.append("circle")
+	.attr("cx", xScale(point.x))
+	.attr("cy", yScale(point.y))
+	.attr("r", 2)
+	.style("opacity", 0.25)
+	.style("fill", insideCircle(point) ? "red" : "black");
+}
+
+// And the big payoff!
+svg.append("text").attr("x", xScale(-1))
+.attr("y", yScale(-1.3))
+.text(4 * numPointsInside / numPoints);
+
+// Ok, so it turns out that this is not a very good estimator of pi.
+//  The point is that we can often do mathematically complicated things
+//  with very simple random processes. We trade precision for implementation
+//  simplicity and understandability.
+
+
+</script>
+</div>
+
+<h3>Discussion: data resolution, small multiples</h3>
+<div>
+We will look at <a href="http://www.huffingtonpost.co.uk/andy-cotgreave/let-your-data-show_b_6561414.html">this article showing multiple ways to present data</a> about the New York City bike share program. Notice how showing the same small plot over and over with slightly different data each time gives us the ability to compare values. Given that I am male and (barely) under 40 and that I was in NYC on a Thursday in February, what's the chance I rented a CitiBike?
+</div>
+
+</body>
+</html>
