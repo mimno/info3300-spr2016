@@ -1,0 +1,67 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<style>
+	body { font-family: "Open Sans"; }
+	div { margin: 30px; }
+	svg { background-color: #eee; }
+	.axis path { fill: none; stroke: black; }
+	.axis line { stroke: black; }
+	.axis text { font-size: 10pt; }
+	path.outline { fill: none; stroke-width: 5; stroke: white; }
+	path.plot { fill: none; stroke-width: 3; }
+	</style>
+</head>
+<body>
+<h3>Prompt for Wednesday, Feb 17. Line plots, Harry Potter books, Projects.</h3>
+
+<svg height="200" width="300"></svg>
+
+<div>
+Line plots are one of the most popular methods for showing sequential numerical data. Here we'll look at a useful d3 function for creating &lt;path&gt; elements from a data array.
+</div>
+<div>
+<script>
+	// Source: http://harrypotter.answers.wikia.com/wiki/How_many_pages_is_the_harry_potter_book
+var harryPotterPages = [
+	{ book: 1, uk: 223, us: 309 },
+	{ book: 2, uk: 251, us: 341 },
+	{ book: 3, uk: 317, us: 435 },
+	{ book: 4, uk: 636, us: 743 },
+	{ book: 5, uk: 766, us: 870 },
+	{ book: 6, uk: 607, us: 652 },
+	{ book: 7, uk: 607, us: 759 }
+];
+		
+var svg = d3.select("svg");
+var height = svg.attr("height");
+var width = svg.attr("width");
+
+var padding = 30;
+var xScale = d3.scale.linear().domain([1, 7]).range([padding, width]);
+var yScale = d3.scale.linear().domain([0, 900]).range([height - padding, 0]);
+
+var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+svg.append("g").attr("transform", "translate(0," + (height - padding) + ")").attr("class", "axis")
+.call(xAxis);
+svg.append("g").attr("transform", "translate(" + padding + ",0)").attr("class", "axis")
+.call(yAxis);
+
+// Create a d3 line() function, and use it to add a path.
+
+</script>
+</div>
+
+<h3>Discussion: Projects, Data vis Zoo</h3>
+<div>
+	Yes, we know you <a href="http://www.buzzfeed.com/lyapalater/group-projects-should-be-wiped-off-the-face-o">hate group projects</a>. (There are at least seven others like that just on Buzzfeed.)
+</div>
+<div>
+	Heer, Bostock and Ogievetsky's <a href="http://queue.acm.org/detail.cfm?id=1805128">Tour through the Visualization Zoo</a>.
+</div>
+
+</body>
+</html>
