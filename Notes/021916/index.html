@@ -1,0 +1,109 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<style>
+/* put a border around the svg element so we can see the coordinate system better. */
+body { font-family: "Open Sans"; } div { margin: 30px; }
+svg { border: solid black 1px; }
+</style>
+</head>
+<body>
+
+<h3>Notes for Friday, Feb 19. Maps.</h3>
+
+<div>We started with <a href="https://www.udel.edu/johnmack/frec682/cholera/snow_map.png">John Snow's map of cholera from a contaminated well</a>. Here's the contemporary version, showing lead test results that <a href="https://www.washingtonpost.com/graphics/health/flint-water-crisis/">closely match the borders of Flint, MI</a>.
+
+<!-- The SVG element will go in here -->
+<div id="map"></div>
+
+<script>
+
+var width = 960,
+    height = 500;
+
+// A projection is a particular type of scale, that maps
+// a pair of LONGITUDE, LATITUDE coordinates (NOT the other
+// way around) to a point in pixel space.
+var projection = d3.geo.equirectangular();
+// Look at the documentation https://github.com/mbostock/d3/wiki/Geo-Projections
+// for different projections and ways to change the 
+// zoom and center of the projection. 
+
+// This function will convert a set of coordinates
+//  into a <path> attribute.
+var path = d3.geo.path().projection(projection);
+	
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+var g = svg.append("g");
+
+// We need to declare a variable outside the scope of
+//  the json callback if we want to examine it. This 
+//  is useful for debugging.
+var worldObjects;
+
+// Get a JSON file containing coordinates of 
+//  countries and landmasses. This is from an 
+//  example provided by Mike Bostock.
+d3.json("world-50m.json", function(error, world) {
+	worldObjects = world;
+	
+	// ANY time we do I/O we should check for errors.
+	if (error) { console.log(error); }
+	
+	// Get an array of coordinate lists for 241 
+	//  geographic entites. This includes sovereign 
+	//  countries as well as territories like Guam.
+	var countries = topojson.feature(world, world.objects.countries).features;
+	
+	// convert each country's data into a path element.
+	countries.forEach(function (country) {
+		g.append("path").attr("d", path(country))
+		.style("fill", "#ccc")
+		.style("stroke", "#888");
+	});
+	
+	// We can use the projection function to get
+	//  the location of a point. This is useful for
+	//  data that comes with specific long/lats.
+	var ithacaCoords = projection([-76, 42]);
+	g.append("circle").attr("cx", ithacaCoords[0])
+	.attr("cy", ithacaCoords[1])
+	.attr("r", 4);
+	
+	// Watch out for mysterious goings on at 
+	//  the enigmatic NULL ISLAND.
+	var nullIsland = projection([0,0]);
+	g.append("circle").attr("cx", nullIsland[0])
+	.attr("cy", nullIsland[1])
+	.attr("r", 4);
+	
+	// We can attach events to SVG elements.
+	//  When we map data elements to svg elements,
+	//  we can then define behaviors without specifying
+	//  a particular country. 
+	g.selectAll("path").data(countries)
+	.on("mouseover", function (country) {
+		console.log(country.id);
+	});
+	
+});
+// The .json() function returns immediately, without
+//  waiting for the response. But it spins off a separate
+//  thread that waits for the response to come back, and
+//  then executes the function that we gave it.
+console.log("after json");
+
+</script>
+
+<h3>Discussion: What causes accidents east of the Commons?</h3>
+<div>
+	Look at the map on page 5 of the <a href="https://assets.documentcloud.org/documents/2712861/Ithaca-Road-Safety-Audit.pdf">Ithaca Road Safety Audit</a>. Also look at the Valley of the Shadow of Pie Charts on page 6. Can you do better?
+</div>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<style>
+/* put a border around the svg element so we can see the coordinate system better. */
+body { font-family: "Open Sans"; } div { margin: 30px; }
+svg { background-color: #f0f0f0; }
+</style>
+</head>
+<body>
+
+<h3>Prompt for Monday February 22. Maps with data.</h3>
+
+<div>Data from <a href="http://www.ers.usda.gov/data-products/atlas-of-rural-and-small-town-america.aspx">USDA Atlas of Rural and Small-Town America</a>.</div>
+
+<!-- The SVG element will go in here -->
+<div id="map"></div>
+
+<script>
+
+var width = 960,
+    height = 500;
+
+var projection = d3.geo.albersUsa();
+
+var path = d3.geo.path().projection(projection);
+	
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+var counties, states;
+
+var usdaAtlas;
+
+var digitScale = d3.scale.category10()
+var populationScale = d3.scale.linear().domain([-5, 0, 5]).range(["#d8b365", "#f5f5f5", "#5ab4ac"]);
+
+d3.json("us.json", function(error, shapes) {
+	counties = topojson.feature(shapes, shapes.objects.counties).features;
+	states = topojson.feature(shapes, shapes.objects.states).features;
+	
+	// This is an important d3 idiom. Previously we were creating SVG
+	//  elements, then binding data objects to those SVG elements.
+	// But we can also add data objects BEFORE creating the SVG elements
+	//  using the .enter() selection. This will reuse any existing 
+	//  elements, and allow us to add any new ones that we need.
+	var countyPaths = svg.append("g");
+	countyPaths.selectAll("path").data(counties).enter()
+	.append("path")
+	.attr("d", path)
+	.style("fill", function (county) { return digitScale(0); })
+	.style("stroke", "none");
+
+	var statePaths = svg.append("g");
+	statePaths.selectAll("path").data(states).enter()
+	.append("path").attr("d", path)
+	.style("fill", "none").style("stroke", "#ccc");
+	
+	// Why is this next part inside the .json() callback?
+	
+	d3.csv("People.csv", function (error, rows) {
+		if (error) {console.log(error);}
+		
+		// what should we do with the CSV data?
+		usdaAtlas = d3.map(rows, function (county) { return Number(county.FIPS); });
+		
+		//countyPaths.selectAll("path")
+		//.style("fill", function (county) {
+			// set fill based on county attributes
+		//});
+		
+	});
+	
+});
+
+</script>
+
+</body>
+</html>
