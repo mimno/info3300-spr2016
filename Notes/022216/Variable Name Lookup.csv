@@ -1,0 +1,192 @@
+Category,varShort,varLong,Map
+People,PopChangeRate1014,"Population change rate, 2010-14",y
+People,NetMigrationRate1014,"Net migration rate, 2010-14",y
+People,Immigration_Rate_2010_2014,"Immigration rate, 2010-14",y
+People,NaturalChangeRate1014,"Natural population change rate, 2010-14",y
+People,PopChangeRate0010,"Population change rate, 2000-10",y
+People,NetMigrationRate0010,"Net migration rate, 2000-10",y
+People,NaturalChangeRate0010,"Natural population change rate, 2000-10",y
+People,Immigration_Rate_2000_2010,"Immigration rate, 2000-10",y
+People,PopDensity2010,"Population density, 2010",y
+People,Under18Pct2010,"Percent of population under age 18, 2010",y
+People,Age65AndOlderPct2010,"Percent of population 65 or older, 2010",y
+People,WhiteNonHispanicPct2010,"Percent Non-Hispanic White, 2010",y
+People,BlackNonHispanicPct2010,"Percent Non-Hispanic African American, 2010",y
+People,AsianNonHispanicPct2010,"Percent Non-Hispanic Asian, 2010",y
+People,NativeAmericanNonHispanicPct2010,"Percent Non-Hispanic Native American, 2010",y
+People,HispanicPct2010,"Percent Hispanic, 2010",y
+People,MultipleRacePct2010,"Percent multiple race, 2010",y
+People,NonHispanicWhitePopChangeRate0010,"Population change rate Non-Hispanic White, 2000-10",y
+People,NonHispanicBlackPopChangeRate0010,"Population change rate Non-Hispanic African American, 2000-10",y
+People,NonHispanicAsianPopChangeRate0010,"Population change rate Non-Hispanic Asian, 2000-10",y
+People,NonHispanicNativeAmericanPopChangeRate0010,"Population change rate Non-Hispanic Native American, 2000-10",y
+People,HispanicPopChangeRate0010,"Population change rate Hispanic, 2000-10",y
+People,MultipleRacePopChangeRate0010,"Population change rate multiple race, 2000-10",y
+People,WhiteNonHispanicNum2010,"Population size Non-Hispanic White, 2010",y
+People,BlackNonHispanicNum2010,"Population size Non-Hispanic  African American, 2010",y
+People,AsianNonHispanicNum2010,"Population size Non-Hispanic Asian, 2010",y
+People,NativeAmericanNonHispanicNum2010,"Population size Non-Hispanic Native American, 2010",y
+People,HispanicNum2010,"Population size Hispanic, 2010",y
+People,MultipleRaceNum2010,"Population size multiple race, 2010",y
+People,ForeignBornPct,"Percent of total population foreign born, 2009-13",y
+People,ForeignBornEuropePct,"Percent of persons born in Europe, 2009-13",y
+People,ForeignBornMexPct,"Percent of persons born in Mexico, 2009-13",y
+People,NonEnglishHHPct,"Percent of non-English speaking households of total households, 2009-13",y
+People,Ed1LessThanHSPct,"Percent of persons with no high school, adults 25 and over, 2009-13",y
+People,Ed2HSGradOnlyPct,"Percent of persons with high school only, adults 25 and over, 2009-13",y
+People,Ed3SomeCollegePct,"Percent of persons with some college, adults 25 and over, 2009-13",y
+People,Ed4CollegePlusPct,"Percent of persons with a college degree, adults 25 and over, 2009-13",y
+People,AvgHHSize,"Average household size, 2009-13",y
+People,FemaleHHPct,"Percent of female headed family households of total households, 2009-13",y
+People,HH65PlusAlonePct,"Percent of persons 65 or older living alone, 2009-13",y
+People,OwnHomePct,"Percent of owner occupied housing units, 2009-13",y
+People,Ed4CollegePlusNum,"College degree, adults 25 and over, 2009-13",n
+People,TotalPopEstBase2010,County Population estimate base 4/1/2010,n
+People,Ed2HSGradOnlyNum,"High school only, adults 25 and over, 2009-13",n
+People,LandAreaSQMiles2010,"Land area in square miles, 2010",n
+People,NaturalChangeNum0010,"Natural change, 2000-10",n
+People,Net_International_Migration_2000_2010,"Net international migration, 2000-10",n
+People,Net_International_Migration_2010_2014,"Net international migration, 2010-14",n
+People,NetMigrationNum0010,"Net migration, 2000-10",n
+People,Ed1LessThanHSNum,"No high school, adults 25 and over, 2009-13",n
+People,FemaleHHNum,"Number of female headed family households, 2009-13",n
+People,NonEnglishHHNum,"Number of non-English speaking households, 2009-13",n
+People,OwnHomeNum,"Number of owner occupied housing units, 2009-13",n
+People,ForeignBornNum,"Number of people foreign born, 2009-13",n
+People,HH65PlusAloneNum,"Number of persons 65 years or older living alone, 2009-13",n
+People,ForeignBornAfricaNum,"Number of persons born in Africa, 2009-13",n
+People,ForeignBornAsiaNum,"Number of persons born in Asia, 2009-13",n
+People,ForeignBornCentralSouthAmNum,"Number of persons born in Central or South America, 2009-13",n
+People,ForeignBornEuropeNum,"Number of persons born in Europe, 2009-13",n
+People,ForeignBornMexNum,"Number of persons born in Mexico, 2009-13",n
+People,ForeignBornCaribNum,"Number of persons born in the Caribbean, 2009-13",n
+People,ForeignBornAfricaPct,"Percent of persons born in Africa, 2009-13",n
+People,ForeignBornAsiaPct,"Percent of persons born in Asia, 2009-13",n
+People,ForeignBornCentralSouthAmPct,"Percent of persons born in Central or South America, 2009-13",n
+People,ForeignBornCaribPct,"Percent of persons born in the Caribean, 2009-13",n
+People,Age65AndOlderNum2010,"Population 65 years or older, 2010",n
+People,PopChangeRate1314,"Population change rate, 2013-14",n
+People,TotalPop2010,Population size 4/1/2010 Census,n
+People,TotalPopEst2010,Population size 7/1/2010,n
+People,TotalPopEst2011,Population size 7/1/2011,n
+People,TotalPopEst2012,Population size 7/1/2012,n
+People,TotalPopEst2013,Population size 7/1/2013,n
+People,TotalPopEst2014,Population size 7/1/2014,n
+People,Under18Num2010,"Population under age 18, 2010",n
+People,Ed3SomeCollegeNum,"Some college, adults 25 and over, 2009-13",n
+People,TotalHH,"Total number of households, 2009-13",n
+People,TotalOccHU,"Total number of occupied housing units, 2009-13",n
+People,TotalPop25Plus,"Total population 25 and older, 2009-13 - 5-year average",n
+People,TotalPopACS,"Total population, 2009-13 5-year average",n
+Jobs,UnempRate2014,"Unemployment rate, 2014",y
+Jobs,UnempRate2013,"Unemployment rate, 2013",n
+Jobs,UnempRate2010,"Unemployment rate, 2010",y
+Jobs,UnempRate2007,"Unemployment rate, 2007",y
+Jobs,PctEmpChange1014,"Employment change rate, 2010-14",y
+Jobs,PctEmpChange1314,"Employment change rate, 2013-14",y
+Jobs,PctEmpChange0714,"Employment change rate, 2007-14",y
+Jobs,PctEmpChange0710,"Employment change rate, 2007-10",y
+Jobs,PctEmpAgriculture,"Percent employed in agriculture, 2009-13",y
+Jobs,PctEmpManufacturing,"Percent  employed in manufacturing, 2009-13",y
+Jobs,PctEmpServices,"Percent employed in services, 2009-13",y
+Jobs,PctEmpGovt,"Percent employed in government, 2009-13",y
+Jobs,NumCivEmployed,"Civilian employed population 16 years and over, 2009-13",n
+Jobs,NumCivLaborforce2007,"Civilian labor force, 2007",n
+Jobs,NumCivLaborForce2008,"Civilian labor force, 2008",n
+Jobs,NumCivLaborForce2009,"Civilian labor force, 2009",n
+Jobs,NumCivLaborForce2010,"Civilian labor force, 2010",n
+Jobs,NumCivLaborForce2011,"Civilian labor force, 2011",n
+Jobs,NumCivLaborForce2012,"Civilian labor force, 2012",n
+Jobs,NumCivLaborforce2013,"Civilian labor force, 2013",n
+Jobs,NumCivLaborforce2014,"Civilian labor force, 2014",n
+Jobs,NumEmployed2007,"Employed, 2007",n
+Jobs,NumEmployed2008,"Employed, 2008",n
+Jobs,NumEmployed2009,"Employed, 2009",n
+Jobs,NumEmployed2010,"Employed, 2010",n
+Jobs,NumEmployed2011,"Employed, 2011",n
+Jobs,NumEmployed2012,"Employed, 2012",n
+Jobs,NumEmployed2013,"Employed, 2013",n
+Jobs,NumEmployed2014,"Employed, 2014",n
+Jobs,NumUnemployed2007,"Unemployed, 2007",n
+Jobs,NumUnemployed2008,"Unemployed, 2008",n
+Jobs,NumUnemployed2009,"Unemployed, 2009",n
+Jobs,NumUnemployed2010,"Unemployed, 2010",n
+Jobs,NumUnemployed2011,"Unemployed, 2011",n
+Jobs,NumUnemployed2011,"Unemployed, 2012",n
+Jobs,NumUnemployed2013,"Unemployed, 2013",n
+Jobs,NumUnemployed2007,"Unemployed, 2014",n
+Jobs,UnempRate2008,"Unemployment rate, 2008",n
+Jobs,UnempRate2009,"Unemployment rate, 2009",n
+Jobs,UnempRate2011,"Unemployment rate, 2011",n
+Jobs,UnempRate2012,"Unemployment rate, 2012",n
+CntyClass,RuralUrbanContinuumCode2013,"Rural-urban Continuum Code, 2013",y
+CntyClass,UrbanInfluenceCode2013,"Urban Influence Code, 2013",y
+CntyClass,RuralUrbanContinuumCode2003,"Rural-urban Continuum Code, 2003",y
+CntyClass,UrbanInfluenceCode2003,"Urban Influence Code, 2003",y
+CntyClass,Metro2013,"Metro, 2013",y
+CntyClass,Nonmetro2013,"Nonmetro, 2013",y
+CntyClass,Micropolitan2013,"Micropolitan, 2013",y
+CntyClass,Perpov_1980_0711,"Persistent poverty counties, 2013",y
+CntyClass,PersistentChildPoverty_1980_2011,"Persistent child poverty counties, 2013",y
+CntyClass,Gas_Change,"Change in the value of onshore natural gas production, 2000-11",y
+CntyClass,Oil_Change,"Change in the value of onshore oil production, 2000-11",y
+CntyClass,Oil_Gas_Change,"Change in the value of onshore oil and natural gas production, 2000-11",y
+CntyClass,EconomicDependence2000,"Economic dependence, 1998-00",y
+CntyClass,FarmDependent2003,"Farm-dependent, 1998-00",y
+CntyClass,ManufacturingDependent2000,"Manufacturing-dependent, 1998-00",y
+CntyClass,RecreationDependent2000,"Nonmetro recreation-dependent, 1997-00",y
+CntyClass,RetirementDestination2000,"Retirement destination, 1990-00",y
+CntyClass,HiCreativeClass2000,"Creative class, 2000",y
+CntyClass,HiAmenity,High natural amenities,y
+CntyClass,Hipov_0913,"High poverty, 2009-13",y
+CntyClass,LowEducation2000,"Low education, 2000",y
+CntyClass,Metro2003,"Metro, 2003",n
+CntyClass,Micropolitan2003,"Micropolitan, 2003",n
+CntyClass,Noncore2003,"Nonmetro noncore, outside Micropolitan and Metropolitan, 2003",n
+CntyClass,Noncore2013,"Nonmetro noncore, outside Micropolitan and Metropolitan, 2013",n
+CntyClass,Nonmetro2003,"Nonmetro, 2003",n
+CntyClass,NonmetroAdj2003,"Nonmetro, adjacent to metro area, 2003",n
+CntyClass,Metro_Adjacent2013,"Nonmetro, adjacent to metro area, 2013",n
+CntyClass,NonmetroNotAdj2003,"Nonmetro, nonadjacent to metro area, 2003",n
+CntyClass,PersistentChildPoverty2004,"Persistent child poverty counties, 2004",n
+CntyClass,PersistentPoverty2000,"Persistent poverty counties, 2004",n
+Income,MedHHInc2013,"Median household income, 2013",y
+Income,PerCapitaInc,"Per capita Income in the past 12 months (In 2013 inflation adjusted dollars), 2009-13",y
+Income,PovertyUnder18Pct2013,"Poverty rate for children age 0-17, 2013",y
+Income,PovertyAllAgesPct2013,"Poverty rate, 2013",y
+Income,Deep_Pov_All,"Deep poverty, 2009-13",Y
+Income,Deep_Pov_Children,"Deep poverty for children, 2009-13",y
+Income,PovertyUnder18Num2013,"Number of people age 0-17 in poverty, 2013",n
+Income,PovertyAllAgesNum2013,"Number of people of all ages in poverty , 2013",n
+Veterans,Vets18OPct,"Percent of the population that are veterans, 2009-13",y
+Veterans,GulfWar2VetsPct,"Percent of veterans that served in the Gulf War period (09/01 or later), 2009-13",y
+Veterans,GulfWar1VetsPct,"Percent of veterans that served in the Gulf War period (08/90-08/01), 2009-13",y
+Veterans,VietnamEraVetsPct,"Percent of veterans that served in the Vietnam Era, 2009-13",y
+Veterans,KoreanWarVetsPct,"Percent of veterans that served in the Korean War period, 2009-13",y
+Veterans,WW2VetsPct,"Percent of veterans that served in the World War II period, 2009-13",y
+Veterans,MaleVetsPct,"Percent of veterans that are male, 2009-13",y
+Veterans,FemaleVetsPct,"Percent of veterans that are female, 2009-13",y
+Veterans,WhiteNonHispVetsPct,"Percent of veterans that are White not Hispanic alone, 2009-13",y
+Veterans,BlackVetsPct,"Percent of veterans that are Black or African American alone, 2009-13",y
+Veterans,HispanicVetsPct,"Percent of veterans that are Hispanic or Latino, 2009-13",y
+Veterans,OtherRaceVetsPct,"Percent of veterans that are of another race or two or more races, 2009-13",y
+Veterans,MedianVetsInc,"Median income (In 2013 dollars) of veterans with income in the past 12 months, 2009-13",y
+Veterans,MedianNonVetsInc,"Median income (In 2013 dollars) of nonveterans with income in the past 12 months, 2009-13",y
+Veterans,LessThanHSVetsPct,"Percent of veterans 25 years and over with less than high school diploma, 2009-13",y
+Veterans,HighSchOnlyVetsPct,"Percent of veterans 25 and over with a high school diploma or GED only, 2009-13",y
+Veterans,SomeCollegeVetsPct,"Percent of veterans 25 and over with some college or Associate's degree, 2009-13",y
+Veterans,CollegeDegreeVetsPct,"Percent of veterans 25 and over with a Bachelor's degree or higher, 2009-13",y
+Veterans,LFPVetsRate,"Labor force participation rate for veterans age 18 to 64, 2009-13",y
+Veterans,UEVetsRate,"Unemployment rate for veterans age 18 to 64, 2009-13",y
+Veterans,PctVetsPoor,"Percent of veterans age 18 to 64 with income in the past 12 months at or below poverty level, 2009-13",y
+Veterans,PctNonVetsPoor,"Percent of nonveterans age 18 to 64 with income in the past 12 months at or below poverty level, 2009-13",y
+Veterans,PctVetsDisabilty,"Percent of veterans age 18 to 64 with a disability, 2009-13",y
+Veterans,PctNonVetsDisabilty,"Percent of nonveterans age 18 to 64 with a disability, 2009-13",y
+Veterans,Vets18ONum,"Civilian population 18 years and over that are veterans, 2009-13",n
+Veterans,CivPop18ONum,"Civilian population 18 years and over, 2009-13",n
+Veterans,CivPopVets18to64Num,"Civilian population age 18 to 64 that are veterans, 2009-13",n
+Veterans,NonVetsDisabilty,"Number of nonveterans age 18 to 64 with a disability, 2009-13",n
+Veterans,NonVetsPoor,"Number of nonveterans age 18 to 64 with income in the past 12 months at or below poverty level, 2009-13",n
+Veterans,CLFVets18to64Num,"Number of veterans age 18 to 64 in the civilian labor force, 2009-13",n
+Veterans,VetsDisabilty,"Number of veterans age 18 to 64 with a disability, 2009-13",n
+Veterans,VetsPoor,"Number of veterans age 18 to 64 with income in the past 12 months at or below poverty level, 2009-13",n
