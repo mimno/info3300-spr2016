@@ -1,0 +1,97 @@
+<html>
+<head>
+<!-- Load the d3 library. -->
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Open Sans"; }
+svg { margin: 20px; background-color: #eee; }
+.bar rect { fill: #ccc; }
+.axis path { fill: none; stroke: black;}
+.axis line { stroke: black; }
+.axis text { font-size: x-small; }
+.dullorange { fill: rgb(255, 167, 94); }
+</style>
+</head>
+<body>
+
+<h3>Bar plots: histograms and the Poisson distribution</h3>
+
+<div id="plot"></div>
+
+<script>
+
+var height = 200;
+var width = 300;
+var padding = 20;
+
+var randomPoisson = function(rate) {
+	var x = Math.random();
+	var i = 0;
+	var threshold = Math.exp(-rate);
+	while (x > threshold) {
+		i++;
+		x -= threshold;
+		threshold *= rate / i;
+	}
+	return i;
+}
+
+function histogram(bins) {
+	var svg = d3.select("#plot").append("svg")
+	.attr("height", height).attr("width", width);
+
+	var xBands = d3.scale.ordinal()
+	.domain(bins.map(function (bin) {
+		 return bin.x;
+	 }))
+	.rangeBands([padding, width-padding], 0.3);
+
+	var yScale = d3.scale.linear()
+	.domain([0,
+		d3.max(bins, function (bin) {
+			 return bin.y;
+		 }) ])
+	.range([height - padding, padding]);
+
+	bins.forEach(function (bin) {
+		svg.append("rect").attr("class", "bar")
+		.attr("x", xBands(bin.x))
+		.attr("y", yScale(bin.y))
+		.attr("width", xBands.rangeBand())
+		.attr("height", yScale(0) - yScale(bin.y));
+	});
+}
+
+var randomNumbers = [];
+for (var i = 0; i < 200; i++) {
+  randomNumbers.push( Math.random() );
+}
+var poissons = [];
+for (var i = 0; i < 100; i++) {
+  poissons.push( randomPoisson(2) );
+}
+
+
+var binCounter = d3.layout.histogram().bins(100).range([0,1]);
+var uniformBins = binCounter(randomNumbers);
+histogram(uniformBins);
+
+var binCounts = uniformBins.map(
+	function (bin) {
+		return bin.length;
+	}
+);
+
+var metaBinCounter = d3.layout.histogram().bins(10)
+.range([0,10]);
+histogram( metaBinCounter(binCounts) );
+histogram( metaBinCounter(poissons) );
+
+</script>
+
+<p>Discussion: <a href="http://projects.fivethirtyeight.com/election-2016/delegate-targets/">538 delegate targets</a>.</p>
+
+<p>Friday: Bring your prototype to class day.</p>
+</body>
+</html>
