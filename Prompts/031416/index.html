@@ -1,0 +1,126 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<style>
+/* put a border around the svg element so we can see the coordinate system better. */
+body { font-family: "Open Sans"; } div { margin: 30px; }
+svg { border: solid black 1px; }
+</style>
+</head>
+<body>
+
+<h3>Work for Monday, Mar 14. Bayesian statistics.</h3>
+
+<p>Bayes' rule comes into play when there is something we can't observe (like a disease state) and something we can observe (like a test result). How do the probabilities and sample sizes relate to each other?</p>
+
+<!-- We'll put our estimate of conditional probabilities here -->
+<ul>
+<li>Infected, tests positive: <span id="truepos"></span></li>
+<li>Infected, tests negative: <span id="falseneg"></span></li>
+<li>Not infected, tests positive: <span id="falsepos"></span></li>
+<li>Not infected, tests negative: <span id="trueneg"></span></li>
+</ul>
+
+<p>Since the total area of the square is one and there is a uniform probability of dropping a point on any part of it, we can think of certain probabilities as exactly equivalent to area. P(infected) is the area of the rectangle to the left of the infected/not-infected cutoff. The joint probability P(positive, infected) is the area of the tall, skinny rectangle on the bottom left. The conditional probability P(positive|infected) is the joint probability <i>divided by</i> the area of the "infected" rectangle. Bayes' rule tells us that the "opposite" conditional probability P(infected|positive) is the area of the tall, skinny bottom-left rectangle divided by the L-shaped region containing all the positive points (true and false).</p>
+
+<!-- The SVG element will go in here -->
+<div id="canvas"></div>
+
+<script>
+var population = [];
+var populationSize = 150;
+
+var svg = d3.select("#canvas").append("svg")
+.attr("width", 400).attr("height", 400);
+
+var xScale = d3.scale.linear()
+.domain([0,1]).range([0,400]);
+
+var yScale = d3.scale.linear()
+.domain([0,1]).range([400,0]);
+
+// The base rate
+var probabilityInfected = 0.05;
+
+// Conditional probabilities
+var positiveGivenInfected = 0.9;
+var positiveGivenNotInfected = 0.05
+
+// We'll use the x coordinate to decide if a patient is infected.
+// If the point is to the left of the imaginary line, it has the condition.
+// The probability that a uniform [0,1] random variable being less than 
+//  a certain number x is x.
+var isInfected = function (patient) {
+	return patient.disease < probabilityInfected;
+};
+
+// We'll use the y coordinate to decide if the patient tests positive.
+// The "critical value" will be different because the conditional probability
+//  is different.
+var isPositive = function (patient) {
+	if (isInfected(patient)) {
+		return patient.test < positiveGivenInfected;
+	}
+	else {
+		return patient.test < positiveGivenNotInfected;
+	}
+}
+
+function addPatient() {
+	var patient = {
+		disease: Math.random(),
+		test: Math.random()
+	};
+	population.push(patient);
+	
+	var circle = svg.append("circle")
+	.attr("id", "p" + population.length)
+	.attr("cx", 0).attr("cy", 0)
+	.attr("r", 5);
+	
+	circle
+	.attr("cx", xScale(patient.disease))
+	.attr("cy", yScale(patient.test))
+	.attr("opacity", 0.7)
+	.attr("stroke-width", 3)
+	.attr("fill", isInfected(patient) ? "red" : "black")
+	.attr("stroke", isPositive(patient) ? "orange" : "");
+
+	var infected = [];
+	var notInfected = [];
+
+	var infectedPositive = [];
+	d3.select("#truepos").text(infectedPositive.length);
+	d3.select("#falseneg").text(infected.length - infectedPositive.length);
+
+	var notInfectedPositive = [];
+	d3.select("#falsepos").text(notInfectedPositive.length);
+	d3.select("#trueneg").text(notInfected.length - notInfectedPositive.length);
+
+	return population.length == populationSize;
+}
+
+
+
+</script>
+
+<h3>Discussion: On the Ball (Times of Oman)</h3>
+
+<p>Sample <a href="http://www.charlesapple.com/uploads/2014/05/1405bCupSamplePageBrazil.jpg">graphic for Brazil</a></p>
+
+<p>Video of <a href="https://vimeo.com/97001010">How it works</a></p>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
