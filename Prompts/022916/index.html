@@ -1,0 +1,76 @@
+<html>
+<head>
+<!-- Load the d3 library. -->
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Open Sans"; }
+svg { margin: 20px; background-color: #eee; }
+.bar rect { fill: #ccc; }
+.axis path { fill: none; stroke: black;}
+.axis line { stroke: black; }
+.axis text { font-size: x-small; }
+.dullorange { fill: rgb(255, 167, 94); }
+</style>
+</head>
+<body>
+
+<h3>Bar plots</h3>
+
+<p>We will be recreating bar plots from <a href="https://medium.com/@neuroecology/punctuation-in-novels-8f316d542ec4">Punctuation in Novels</a>.</p>
+
+<div id="plot"></div>
+
+<script>
+
+var height = 200;
+var width = 300;
+var padding = 100;
+
+var svg = d3.select("#plot").append("svg")
+.attr("height", height).attr("width", width);
+
+var novel = "Call me Ishmael. Some years ago--never mind how long precisely--having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people's hats off--then, I account it high time to get to sea as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the ship. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the ocean with me.";
+
+var punctuation = novel.replace(/[A-Za-z ]/g, "").split("");
+
+function Counter (list) {
+	var count = {};
+	var keys = [];
+	list.forEach(function (x) {
+		if (count[x]) { count[x]++; }
+		else { keys.push(x); count[x] = 1; }
+	});
+	return { count: count, keys: keys };
+}
+
+var punctCounts = Counter(punctuation);
+var yBands = d3.scale.ordinal()
+.domain(punctCounts.keys)
+.rangeRoundBands([10, height], 0.3);
+
+var yPoints = d3.scale.ordinal()
+.domain(punctCounts.keys)
+.rangePoints([10, height], 1.0);
+
+var xScale = d3.scale.linear()
+.domain([0, 10])
+.range([padding, width - padding]);
+
+// We'll replace the 0s with functions
+punctCounts.keys.forEach(function (p) {
+	svg.append("text").attr("x", 0)
+	.attr("y", 0)
+	.text(p);
+	
+	svg.append("rect")
+	.attr("x", 0)
+	.attr("y", 0)
+	.attr("height", 0)
+	.attr("width", 0);
+});
+
+
+</script>
+</body>
+</html>

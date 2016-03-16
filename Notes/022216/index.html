@@ -1,0 +1,164 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<style>
+/* put a border around the svg element so we can see the coordinate system better. */
+body { font-family: "Open Sans"; } div { margin: 30px; }
+svg { background-color: #f0f0f0; }
+</style>
+</head>
+<body>
+
+<h3>Notes for Monday February 22. Maps with data.</h3>
+
+<p>This code will create a <i>choropleth</i> (NOT a chloropleth!). These plots are attributed to <a href="http://www.datavis.ca/papers/GuerryLife.pdf">Andr&eacute;-Michel Guerry</a> (see p. 8).</p>
+
+<p>I've focused the map on the southeastern US. We have population change data for two periods, 2000&ndash;2010 and 2010&endash;2014. The first block includes the housing bubble, the second includes the depths of the Great Recession and the slow recovery. The default view shows population growth in the first period, scaled to be comparable to the second (shorter) period. Pretty much every county is growing, with the notable exception of post-Katrina New Orleans. Click the second button to see the population growth in the second period. Now large numbers of counties are losing population, especially in rural areas. Finally, click the third button to get the <i>difference</i> in differences: the acceleration of population. This view shows that growth has slowed in almost all counties except urban areas.</p>
+<p>
+	All three views are vital to seeing what happened. Atlanta is growing, but a ring of outer suburbs has hit the brakes. Jacksonville on the east coast of Florida is still growing, but it has slowed down considerably. Parts of rural Alabama are losing population faster than they were before. Gulf coast Florida has gone from growth to decline, while Atlantic coast Florida is still growing.
+</p>
+
+<div>Data from <a href="http://www.ers.usda.gov/data-products/atlas-of-rural-and-small-town-america.aspx">USDA Atlas of Rural and Small-Town America</a>.</div>
+
+<!-- The SVG element will go in here -->
+<div id="buttons">
+	<button id="change1">Pop &Delta; 2000-2010</button>
+	<button id="change2">Pop &Delta; 2010-2014</button>
+	<button id="secondOrder">Pop acceleration</button>
+</div>
+<div id="map"></div>
+
+<script>
+// These numbers are good defaults for the standard projection.
+var width = 960,
+    height = 500;
+
+// Here's another example of this projection: http://bl.ocks.org/mbostock/4090848
+var projection = d3.geo.albersUsa()
+	.scale(4000)
+	.translate([-350,-150]);
+
+var path = d3.geo.path().projection(projection);
+	
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+var counties, states;
+
+var usdaAtlas;
+
+// An ordinal scale with 10 default colors. See https://github.com/mbostock/d3/wiki/Ordinal-Scales.
+var digitScale = d3.scale.category10()
+
+// A diverging three-value scale from http://colorbrewer2.org/
+// Note that (1) this is a *linear* scale, but its output is a color code
+// and (2) this is *piecewise* linear, essentially combining two linear scales
+// that diverge at 0.
+var populationScale = d3.scale.linear().domain([-5, 0, 5]).range(["#d8b365", "#f5f5f5", "#5ab4ac"]);
+
+// I'm going to update the path fills, so I'll keep a variable outside
+//  the scope of the callback function.
+var countyPaths;
+
+d3.json("us.json", function(error, shapes) {
+	
+	// us.json (source: Mike Bostock) is in GeoJSON format. 
+	// Let's convert it to TopoJSON.
+	counties = topojson.feature(shapes, shapes.objects.counties).features;
+	states = topojson.feature(shapes, shapes.objects.states).features;
+	
+	// I've modified this from the in-class version, by adding a 
+	//  separate variable for the group containing counties.
+	var countyGroup = svg.append("g");
+	
+	// This is an important d3 idiom. Previously we were creating SVG
+	//  elements, then binding data objects to those SVG elements.
+	// But we can also add data objects BEFORE creating the SVG elements
+	//  using the .enter() selection. This will reuse any existing 
+	//  elements, and allow us to add any new ones that we need.
+	countyPaths = countyGroup.selectAll("path")
+	.data(counties).enter()
+	.append("path")
+	.attr("class", "county")
+	.attr("d", path)
+	.style("fill", function (county) {
+		// Grab the first digit of the FIPS code, and convert it
+		//  to a color.
+		return digitScale(Math.floor(county.id / 10000));
+	})
+	.style("stroke", "none");
+
+	var statePaths = svg.append("g");
+	statePaths.selectAll("path").data(states).enter()
+	.append("path").attr("d", path)
+	.style("fill", "none").style("stroke", "#ccc");
+	
+	// This part is inside the json callback because we need to create
+	//  the map before we can change styles of the elements associated
+	//  with the map.
+	d3.csv("People.csv", function (error, rows) {
+		// The "rows" array will contain objects. How are they constructed?
+		//  What determines the attribute names, and how are the attribute
+		//  values (particularly numbers) represented?
+		
+		if (error) {console.log(error);}
+		
+		// We need to be able to look up a row of the table based on the
+		//  FIPS code for a county, but what we have is an array.
+		// We will construct a map, whose key is a FIPS code and whose
+		//  value is a row of the data table.
+		// See https://github.com/mbostock/d3/wiki/Arrays
+		usdaAtlas = d3.map(rows, function (county) {
+			// Why do we need Number() here?
+			return Number(county.FIPS);
+		});
+		
+		// When we created the <path>s for the counties, we set their
+		//  fill based on their FIPS code. Now reset them based on
+		// population change. You'll notice a flash of state-level color
+		//  while your browser loads the USDA atlas file.
+		countyPaths.style("fill", function (county) {
+			var countyData = usdaAtlas.get(county.id);
+			// Error check! Certain FIPS codes aren't in the atlas.
+			if (! countyData) { return "#000";}
+			return populationScale( 0.4 * countyData.PopChangeRate0010 );
+			// set fill based on county attributes
+		});
+		
+		// Make it interactive!
+		d3.select("#change1").on("click", function () {
+			countyPaths.style("fill", function (county) {
+				var countyData = usdaAtlas.get(county.id);
+				if (! countyData) { return "#000";}
+				return populationScale( 0.4 * countyData.PopChangeRate0010 );
+				// set fill based on county attributes
+			});
+		});
+		d3.select("#change2").on("click", function () {
+			countyPaths.style("fill", function (county) {
+				var countyData = usdaAtlas.get(county.id);
+				if (! countyData) { return "#000";}
+				return populationScale( countyData.PopChangeRate1014 );
+				// set fill based on county attributes
+			});
+		});
+		d3.select("#secondOrder").on("click", function () {
+			countyPaths.style("fill", function (county) {
+				var countyData = usdaAtlas.get(county.id);
+				if (! countyData) { return "#000";}
+				return populationScale( countyData.PopChangeRate1014 - 0.4 * countyData.PopChangeRate0010 );
+				// set fill based on county attributes
+			});
+		});
+		
+	});
+	
+});
+
+</script>
+
+</body>
+</html>

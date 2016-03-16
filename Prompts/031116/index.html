@@ -1,0 +1,199 @@
+<html>
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Open Sans"; }
+svg { margin: 20px; background-color: #eee; }
+rect.bar { fill: #4169e1; }
+text.node {
+	fill: #444;
+	font-size: 11;
+	dominant-baseline: middle; 
+	text-anchor: middle;
+	cursor: default;
+}
+text.selected {
+	fill: #a00;
+	font-weight: bold;
+	dominant-baseline: middle; 
+	text-anchor: middle;
+	cursor: default;
+}
+line.link {
+	stroke: #888;
+	opacity: 0.3;
+}
+</style>
+</head>
+<body>
+<h3>Prompt for Friday March 11. Networks + dynamic updates.</h3>
+
+<div id="network">
+</div>
+
+<script>
+var height = 600;
+var width = 600;
+var padding = 20;
+
+// Source: https://writeonly.wordpress.com/2009/03/20/adjacency-list-of-states-of-the-united-states-us/
+
+var adjacentStates = [
+"AK", 
+"AL,MS,TN,GA,FL", 
+"AR,MO,TN,MS,LA,TX,OK", 
+"AZ,CA,NV,UT,CO,NM", 
+"CA,OR,NV,AZ", 
+"CO,WY,NE,KS,OK,NM,AZ,UT", 
+"CT,NY,MA,RI", 
+"DC,MD,VA", 
+"DE,MD,PA,NJ", 
+"FL,AL,GA", 
+"GA,FL,AL,TN,NC,SC", 
+"HI", 
+"IA,MN,WI,IL,MO,NE,SD", 
+"ID,MT,WY,UT,NV,OR,WA", 
+"IL,IN,KY,MO,IA,WI", 
+"IN,MI,OH,KY,IL", 
+"KS,NE,MO,OK,CO", 
+"KY,IN,OH,WV,VA,TN,MO,IL", 
+"LA,TX,AR,MS", 
+"MA,RI,CT,NY,NH,VT", 
+"MD,VA,WV,PA,DC,DE", 
+"ME,NH", 
+"MI,WI,IN,OH", 
+"MN,WI,IA,SD,ND", 
+"MO,IA,IL,KY,TN,AR,OK,KS,NE", 
+"MS,LA,AR,TN,AL", 
+"MT,ND,SD,WY,ID", 
+"NC,VA,TN,GA,SC", 
+"ND,MN,SD,MT", 
+"NE,SD,IA,MO,KS,CO,WY", 
+"NH,VT,ME,MA", 
+"NJ,DE,PA,NY", 
+"NM,AZ,UT,CO,OK,TX", 
+"NV,ID,UT,AZ,CA,OR", 
+"NY,NJ,PA,VT,MA,CT", 
+"OH,PA,WV,KY,IN,MI", 
+"OK,KS,MO,AR,TX,NM,CO", 
+"OR,CA,NV,ID,WA", 
+"PA,NY,NJ,DE,MD,WV,OH", 
+"RI,CT,MA", 
+"SC,GA,NC", 
+"SD,ND,MN,IA,NE,WY,MT", 
+"TN,KY,VA,NC,GA,AL,MS,AR,MO", 
+"TX,NM,OK,AR,LA", 
+"UT,ID,WY,CO,NM,AZ,NV", 
+"VA,NC,TN,KY,WV,MD,DC", 
+"VT,NY,NH,MA", 
+"WA,ID,OR", 
+"WI,MI,MN,IA,IL", 
+"WV,OH,PA,MD,VA,KY",
+"WY,MT,SD,NE,CO,UT,ID"
+];
+
+var svg = d3.select("#network").append("svg").attr("height", height).attr("width", width);
+	
+var graph = {
+	nodes: [],
+	links: []
+};
+
+var allStates = [];
+var stateIndices = {};
+
+// Construct nodes for each state, and keep track of their ids.
+adjacentStates.forEach(function (line) {
+	var states = line.split(",");
+	var source = states.shift();
+	
+	// this will record the numeric index of a state's code
+	stateIndices[source] = graph.nodes.length;
+	allStates.push(source);
+	
+	graph.nodes.push({ name: source, adjacent: states, visited: 0 });
+});
+	
+// Construct a state network
+adjacentStates.forEach(function (line) {
+	var states = line.split(",");
+	var source = stateIndices[ states.shift() ];
+
+	states.forEach(function (targetCode) {
+		var target = stateIndices[ targetCode ]; // convert AK to 0
+		//console.log(source, target, targetCode);
+		graph.links.push({ source: source, target: target });
+	});
+});
+		 
+var force = d3.layout.force()
+.charge(-250)
+.gravity(0.1)
+.size([width, height]);
+
+force.nodes(graph.nodes)
+.links(graph.links)
+.start();
+
+var link = svg.selectAll("line")
+.data(graph.links);
+
+link.enter()
+.append("line")
+.attr("class", "link");
+
+var nodes = svg.selectAll("text")
+ .data(graph.nodes);
+ 
+nodes.enter()
+ .append("text")
+ .attr("class", "node")
+ .text(function (d) { return d.name; });
+  
+nodes.call(force.drag);
+
+force.on("tick", function() {
+ link.attr("x1", function(d) { return d.source.x; })
+     .attr("y1", function(d) { return d.source.y; })
+     .attr("x2", function(d) { return d.target.x; })
+     .attr("y2", function(d) { return d.target.y; });
+
+ nodes.attr("x", function(d) { return d.x; })
+     .attr("y", function(d) { return d.y; });
+});
+
+var currentState = "MA";
+
+nodes.attr("class", function (state) { return state.name === currentState ? "selected" : "node"; });
+
+// Return a random element from the provided list.
+function randomElement(list) {
+	return list[ Math.floor(Math.random() * list.length) ];
+}
+
+// Move to a new state
+function jump() {
+	var node = graph.nodes[ stateIndices[currentState] ];
+	node.visited++;
+
+	if (node.adjacent.length == 0 || Math.random() < 0.15) {
+		currentState = randomElement(allStates);
+	}
+	else {
+		currentState = randomElement(node.adjacent);
+	}
+	
+	var fontScale = d3.scale.linear()
+	.domain([0, d3.max(graph.nodes, function (d) { return d.visited; })])
+	.range([8, 32]);
+	
+	// Update the appearance of nodes
+}
+
+// Set an animation timer
+
+</script>
+
+</body>
+</html>
