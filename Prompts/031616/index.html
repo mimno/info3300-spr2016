@@ -1,0 +1,138 @@
+<html>
+<head>
+<!-- The dataset is here:
+http://mimno.infosci.cornell.edu/info3300/yelp_stars.json -->
+
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+svg { border: solid black 1px; }
+.axis path { fill: none; stroke: black;}
+.axis line { stroke: black; }
+text { font-size: small; font-family: "Open Sans", Calibri; opacity: 0.3; text-anchor: middle; dominant-baseline: central; }
+text:hover { fill: blue; opacity: 1.0; font-weight: bold; font-size: xx-large; }
+</style>
+</head>
+<body>
+
+<div id="plot"></div>
+
+<script>
+
+var height = 600;
+var width = 800;
+var padding = 50;
+
+var countMinMax = [45, 5000];
+
+var svg = d3.select("#plot").append("svg")
+   .attr("height", height).attr("width", width);
+
+// We could use a log scale here, but I'm going to use a linear
+// scale and pass in the log of the probability ratio.
+var xScale = d3.scale.linear()
+  .domain([-6, 6]).range([padding, width - padding]);
+  
+// We'll use a log scale on the y axis, so we can see both low-frequency
+// words and high frequency words.
+var yScale = d3.scale.linear()
+  .domain(countMinMax).range([height - padding, padding]);
+
+var xAxis = d3.svg.axis().scale(xScale);
+svg.append("g")
+  .attr("class", "axis")
+  .attr("transform", "translate(0, " + yScale(countMinMax[0]) + ")")
+  .call(xAxis);
+
+var yAxis = d3.svg.axis().scale(yScale).orient("left");
+svg.append("g")
+	.attr("class", "axis")
+	.attr("transform", "translate(" + padding + ", 0)")
+	.call(yAxis);
+
+
+var wordGroup = svg.append("g");
+var words;
+
+var tweets = [];
+
+var filesCompleted = 0;
+
+d3.csv("realDonaldTrump_tweets.csv", function (error, data) {
+	data.forEach(function (line) { tweets.push( ["trump", line.text]) });
+	filesCompleted++;
+	if (filesCompleted == 3) { process(); }
+});
+
+d3.csv("SenSanders_tweets.csv", function (error, data) {
+	data.forEach(function (line) { tweets.push( ["sanders", line.text]) });
+	filesCompleted++;
+	if (filesCompleted == 3) { process(); }
+});
+
+d3.csv("HillaryClinton_tweets.csv", function (error, data) {
+	data.forEach(function (line) { tweets.push( ["clinton", line.text]) });
+	filesCompleted++;
+	if (filesCompleted == 3) { process(); }
+});
+
+var vocabulary = [];
+var wordCounts = {};
+var tokenTotals = { trump: 0, sanders: 0, clinton: 0 };
+var tweetTotals = { trump: 0, sanders: 0, clinton: 0 };
+
+function process() {
+	tweets.forEach(function (tweet) {
+		var user = tweet[0];
+		var tokens = tweet[1].split(/\s/);
+		
+		tokenTotals[user] += tokens.length;
+		tweetTotals[user] += 1;
+		
+		tokens.forEach(function (token) {
+			if (! wordCounts[token]) {
+				// Set up data structures for a previously unseen word
+				vocabulary.push(token);
+				wordCounts[token] = { trump: 0, sanders: 0, clinton: 0, total: 0 };
+			}
+			wordCounts[token][user] += 1;
+			wordCounts[token]["total"] += 1;
+		})
+	});
+
+	vocabulary = vocabulary.filter(function (word) { return wordCounts[word].total > 50 });
+
+	words = wordGroup.selectAll("text").data(vocabulary);
+
+	words.enter().append("text")
+	.attr("y", function(w) { return yScale(wordCounts[w].total); })
+	.text(function (w) { return w; } );
+
+	display("sanders", "clinton");
+}
+
+function display(leftUser, rightUser) {
+
+	words
+	.attr("x", function(w) { 
+		
+		var leftProbability = (wordCounts[w][leftUser] + 1) / tokenTotals[leftUser];
+		var rightProbability = (wordCounts[w][rightUser] + 1) / tokenTotals[rightUser];
+		
+		return xScale(0); // what should go here?
+	});
+	
+}
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
