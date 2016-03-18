@@ -1,0 +1,226 @@
+<html>
+<head>
+<!-- The dataset is here:
+http://mimno.infosci.cornell.edu/info3300/yelp_stars.json -->
+
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+<style>
+svg { border: solid black 1px; }
+.axis path { fill: none; stroke: black;}
+.axis line { stroke: black; }
+text { font-size: xx-small; font-family: "Open Sans Condensed", Calibri; opacity: 0.3; text-anchor: middle; dominant-baseline: central; }
+text:hover { fill: blue; opacity: 1.0; font-weight: bold; font-size: xx-large; }
+</style>
+</head>
+<body>
+
+<p id="tweetForm">
+	<input type="text" id="tweetText" size="140" />
+	<br/>
+	<select id="leftUser">
+		<option value="clinton" selected="selected">Hillary Clinton</option>
+		<option value="sanders">Bernie Sanders</option>
+		<option value="trump">Donald Trump</option>
+	</select> vs.
+	<select id="rightUser">
+		<option value="clinton">Hillary Clinton</option>
+		<option value="sanders">Bernie Sanders</option>
+		<option value="trump" selected="selected">Donald Trump</option>
+	</select>
+	<button id="submit" onclick="update()">View</button>
+</p>
+
+<div id="plot"></div>
+
+<script>
+
+var height = 600;
+var width = 800;
+var padding = 50;
+
+var countMinMax = [25, 5000];
+
+var svg = d3.select("#plot").append("svg")
+   .attr("height", height).attr("width", width);
+
+// We could use a log scale here, but I'm going to use a linear
+// scale and pass in the log of the probability ratio.
+var xScale = d3.scale.linear()
+  .domain([-6, 6]).range([padding, width - padding]);
+  
+// We'll use a log scale on the y axis, so we can see both low-frequency
+// words and high frequency words.
+var yScale = d3.scale.log()
+  .domain(countMinMax).range([height - padding, padding]);
+
+var xAxis = d3.svg.axis().scale(xScale);
+svg.append("g")
+  .attr("class", "axis")
+  .attr("transform", "translate(0, " + yScale(countMinMax[0]) + ")")
+  .call(xAxis);
+
+var yAxis = d3.svg.axis().scale(yScale).orient("left");
+svg.append("g")
+	.attr("class", "axis")
+	.attr("transform", "translate(" + padding + ", 0)")
+	.call(yAxis);
+
+svg.append("line")
+	.attr("x1", xScale(0))
+	.attr("x2", xScale(0))
+	.attr("y1", yScale(countMinMax[0]))
+	.attr("y2", yScale(countMinMax[1]))
+	.style("stroke", "#ddd");
+	
+	
+
+var leftUser = "clinton";
+var rightUser = "trump";
+
+var wordGroup = svg.append("g");
+var words;
+
+var tweets = [];
+
+var filesCompleted = 0;
+
+d3.csv("realDonaldTrump_tweets.csv", function (error, data) {
+	data.forEach(function (line) { tweets.push( ["trump", line.text]) });
+	filesCompleted++;
+	if (filesCompleted == 3) { process(); }
+});
+
+d3.csv("SenSanders_tweets.csv", function (error, data) {
+	data.forEach(function (line) { tweets.push( ["sanders", line.text]) });
+	filesCompleted++;
+	if (filesCompleted == 3) { process(); }
+});
+
+d3.csv("HillaryClinton_tweets.csv", function (error, data) {
+	data.forEach(function (line) { tweets.push( ["clinton", line.text]) });
+	filesCompleted++;
+	if (filesCompleted == 3) { process(); }
+});
+
+var vocabulary = [];
+var wordCounts = {};
+var tokenTotals = { trump: 0, sanders: 0, clinton: 0 };
+var tweetTotals = { trump: 0, sanders: 0, clinton: 0 };
+
+function process() {
+	tweets.forEach(function (tweet) {
+		var user = tweet[0];
+		var tokens = tweet[1].split(/\s/);
+		
+		tokenTotals[user] += tokens.length;
+		tweetTotals[user] += 1;
+		
+		tokens.forEach(function (token) {
+			if (! wordCounts[token]) {
+				// Set up data structures for a previously unseen word
+				vocabulary.push(token);
+				wordCounts[token] = { trump: 0, sanders: 0, clinton: 0, total: 0 };
+			}
+			wordCounts[token][user] += 1;
+			wordCounts[token]["total"] += 1;
+		})
+	});
+
+	vocabulary = vocabulary.filter(function (word) { return wordCounts[word].total > countMinMax[0]; });
+
+	words = wordGroup.selectAll("text").data(vocabulary);
+
+	words.enter().append("text")
+	.attr("y", function(w) { return yScale(wordCounts[w].total); })
+	.text(function (w) { return w; } );
+
+	display();
+}
+
+function prob(word, user) {
+	return (wordCounts[word][user] + 1) /
+	(tokenTotals[user] + vocabulary.length);
+}
+
+function logProb(word, user) {
+	return Math.log((wordCounts[word][user] + 1) /
+	(tokenTotals[user] + vocabulary.length));
+}
+
+
+function update() {
+	var tokens = d3.select("#tweetText").property("value").split(/\s+/);
+	leftUser = d3.select("#leftUser").property("value");
+	rightUser = d3.select("#rightUser").property("value");
+	
+	display();
+	
+	var logRatioLines = svg.selectAll("line.logratio").data(tokens);
+
+	logRatioLines.enter().append("line").attr("class", "logratio")
+	.style("stroke", "blue").style("stroke-width", 5).style("opacity", 0.5);
+	logRatioLines.exit().remove();
+	
+	// Display a line from the center to the location of each token.
+}
+
+function display() {
+
+	words.transition().duration(1000)
+	.attr("x", function(w) { 
+		
+		var leftProbability = prob(w, leftUser);
+		var rightProbability = prob(w, rightUser);
+		
+		return xScale(Math.log(rightProbability / leftProbability)); 
+	});
+	
+}
+
+function sampleUser() {
+	var totalTokens = tokenTotals["clinton"] + tokenTotals["sanders"] + tokenTotals["trump"];
+	var x = Math.random() * totalTokens;
+	if (x < tokenTotals["clinton"]) {
+		return "clinton";
+	}
+	else if (x < tokenTotals["clinton"] + tokenTotals["sanders"]) {
+		return "sanders";
+	}
+	else {
+		return "trump";
+	}
+}
+
+function resample(word, n) {
+	var realCounts = wordCounts[word];
+	
+	for (var i = 0; i < n; i++) {
+		var fakeCounts = { trump: 0, sanders: 0, clinton: 0 };
+		for (var j = 0; j < realCounts["total"]; j++) {
+			fakeCounts[ sampleUser() ] += 1;
+		}
+		
+		var logRatio =
+		Math.log((fakeCounts[rightUser] + 1) / (tokenTotals[rightUser] + vocabulary.length)) - 
+		Math.log((fakeCounts[leftUser] + 1) / (tokenTotals[leftUser] + vocabulary.length));
+		
+		// Display where the word would go if it were sampled from the null (boring) model.
+		
+	}
+}
+
+
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
