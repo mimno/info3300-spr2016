@@ -28,6 +28,7 @@ var height = 300;
 var width = 300;
 var padding = 50;
 
+// From http://stackoverflow.com/questions/521295/javascript-random-seeds
 var seed = 3;
 function seededRandom() {
     var x = Math.sin(seed++) * 10000;
@@ -66,7 +67,7 @@ function makeClusters(numClusters, pointsPerCluster, spread) {
 		 
 		for (var i = 0; i < pointsPerCluster; i++) {
 			points.push({
-				cluster: clusterID,
+				cluster: -1,
 				x: center.x + gaussian() * spread,
 				y: center.y + gaussian() * spread
 			});
