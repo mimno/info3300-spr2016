@@ -135,9 +135,17 @@ d3.select("#findclosest").on("click", function () {
 		var shortestDistance = Number.MAX_VALUE;
 		for (var i = 0; i < centroids.length; i++) {
 			var c = centroids[i];
+			
+			// We use the distance as calculated from the data values.
+			// But this could get us into trouble. We're rescaling the
+			//  data values to show them in in pixel space, so if the
+			//  variance of one dimension is a lot bigger than the other,
+			//  we might see what appear to be long skinny clusters.
+			// Another alternative is to use distance in pixel space,
+			//  which may produce different results.
 			var distance = Math.sqrt( 
-				(xScale(c.x) - xScale(point.x)) * (xScale(c.x )- xScale(point.x)) +
-				(yScale(c.y) - yScale(point.y)) * (yScale(c.y) - yScale(point.y))
+				(c.x - point.x) * (c.x - point.x) +
+				(c.y - point.y) * (c.y - point.y)
 			);
 		
 			if (distance < shortestDistance) {
