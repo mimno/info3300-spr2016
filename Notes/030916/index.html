@@ -1,0 +1,182 @@
+<html>
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Open Sans"; }
+svg { margin: 20px; background-color: #eee; }
+rect.bar { fill: #4169e1; }
+text.label {
+	fill: #888;
+	font-size: x-small;
+	dominant-baseline: middle; 
+	text-anchor: middle;
+}
+circle.node {
+	fill: green;
+	opacity: 0.3;
+}
+line.link {
+	stroke: black;
+	opacity: 0.3;
+}
+</style>
+</head>
+<body>
+<h3>Notes for Wed Mar 9. Networks.</h3>
+
+<div id="buttons">
+	<button id="sample">Sample</button>
+</div>
+
+<div id="network">
+</div>
+
+<script>
+var height = 300;
+var width = 300;
+var padding = 20;
+
+var svg = d3.select("#network").append("svg").attr("height", height).attr("width", width);
+	
+var graph;
+
+var randomPoisson = function(rate) {
+	var x = Math.random();
+	var i = 0;
+	var threshold = Math.exp(-rate);
+	while (x > threshold) {
+		i++;
+		x -= threshold;
+		threshold *= rate / i;
+	}
+	return i;
+}
+
+var randomPoissons = function(n, rate) {
+	var samples = [];
+	for (var i = 0; i < n; i++) {
+		samples.push(randomPoisson(rate));
+	}
+	return samples;
+}
+
+function histogram(bins) {
+	var svg = d3.select("#network").append("svg")
+	.attr("height", height).attr("width", width);
+
+	var xBands = d3.scale.ordinal()
+	.domain(bins.map(function (bin) {
+		 return bin.x;
+	 }))
+	.rangeBands([padding, width-padding], 0.3, 0.1);
+
+	var xPoints = d3.scale.ordinal()
+	.domain(bins.map(function (bin) {
+		 return bin.x;
+	 }))
+	.rangePoints([padding, width-padding], 1.0);
+
+	var yScale = d3.scale.linear()
+	.domain([0,
+		d3.max(bins, function (bin) {
+			 return bin.y;
+		 }) ])
+	.range([height - padding, padding]);
+
+	bins.forEach(function (bin) {
+		svg.append("rect").attr("class", "bar")
+		.attr("x", xBands(bin.x))
+		.attr("y", yScale(bin.y))
+		.attr("width", xBands.rangeBand())
+		.attr("height", yScale(0) - yScale(bin.y));
+		
+		svg.append("text").attr("class", "label")
+		.attr("x", xPoints(bin.x))
+		.attr("y", yScale(0) + (padding / 2))
+		.text(bin.x);
+	});
+}
+
+var degreeCounter = d3.layout.histogram().bins(10).range([0,10]);
+
+function randomNode() {
+	return Math.floor(Math.random() * graph.nodes.length);
+}
+
+var numNodes = 20;
+var numEdges = 20;
+
+d3.select("#sample").on("click", function () {
+	graph = {
+		nodes: [],
+		links: []
+	};
+	
+	// Construct a random network
+	for (var i = 0; i < numNodes; i++) {
+		graph.nodes.push({});
+	}
+	
+	for (var i = 0; i < numEdges; i++) {
+		graph.links.push({
+			source: randomNode(),
+			target: randomNode()
+		});
+	}
+	
+	numEdges -= 1;
+			 
+	
+	var force = d3.layout.force()
+    .size([width, height]);
+
+	force.nodes(graph.nodes)
+	.links(graph.links)
+	.start();
+
+	var link = svg.selectAll("line")
+	.data(graph.links);
+	
+	link.enter()
+	.append("line")
+	.attr("class", "link");
+	
+	link.exit().remove();
+ 
+	var node = svg.selectAll("circle")
+	 .data(graph.nodes);
+	 
+	node.enter()
+	 .append("circle")
+	 .attr("class", "node")
+	 .attr("r", 5);
+	  
+	node.call(force.drag);
+ 
+	force.on("tick", function() {
+	 link.attr("x1", function(d) { return d.source.x; })
+	     .attr("y1", function(d) { return d.source.y; })
+	     .attr("x2", function(d) { return d.target.x; })
+	     .attr("y2", function(d) { return d.target.y; });
+
+	 node.attr("cx", function(d) { return d.x; })
+	     .attr("cy", function(d) { return d.y; });
+	});
+	
+	var nodeDegrees = 
+	graph.nodes.map(function (node) {
+		return node.weight;
+	});
+	console.log(d3.mean(nodeDegrees), d3.variance(nodeDegrees));
+	console.log(degreeCounter(nodeDegrees));
+	histogram(degreeCounter(nodeDegrees));
+	
+ 
+});
+
+
+</script>
+
+</body>
+</html>

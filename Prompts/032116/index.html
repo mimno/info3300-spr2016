@@ -1,0 +1,178 @@
+<html>
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Open Sans"; }
+svg { border: solid black 1px; }
+button { padding: 5px; }
+</style>
+</head>
+<body>
+<h3>Prompt for Mon, Mar 21. Clustering.</h3>
+
+<p>Discussion: 538's <a href="http://fivethirtyeight.com/datalab/tom-hanks-and-steven-spielberg-might-be-the-best-collaboration-in-hollywood/">Clustering of Tom Hanks movies</a>.
+</p>
+
+<div>
+	<button id="findclosest">Find Closest</button>
+	<button id="movemeans">Move Means</button>
+</div>
+<div id="points">
+</div>
+
+<p>Another view of <a href="http://bl.ocks.org/blacki/ebba08223eba20b56b62">k-means equilibria</a>.</p>
+
+<script>
+var height = 300;
+var width = 300;
+var padding = 50;
+
+// From http://stackoverflow.com/questions/521295/javascript-random-seeds
+var seed = 3;
+function seededRandom() {
+    var x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
+var svg = d3.select("#points").append("svg").attr("height", height).attr("width", width);
+	
+svg.append("defs")
+.append("filter").attr("id", "blur")
+.attr("x", "-50%").attr("y", "-50%")
+.attr("height", "200%").attr("width", "200%")
+.append("feGaussianBlur").attr("in", "SourceGraphic").attr("stdDeviation", 10);
+
+var lines, circles, centroids;
+
+var gaussian = d3.random.normal();
+
+var xScale = d3.scale.linear().domain([0,1]).range([padding, width - padding]);
+var yScale = d3.scale.linear().domain([0,1]).range([height - padding, padding]);
+
+function makeClusters(numClusters, pointsPerCluster, spread) {
+	var points = [];
+	
+	for (var clusterID = 0; clusterID < numClusters; clusterID++) {
+		var center = { x: seededRandom(), y: seededRandom() };
+
+		// Place a blurry indication of where the cluster "should" be.
+		svg.append("circle")
+		.attr("class", "realCenter")
+		.attr("cx", xScale(center.x))
+		.attr("cy", yScale(center.y))
+		.attr("r", 20)
+		.style("fill", "#9c9")
+		.attr("filter", "url(#blur)");
+		 
+		for (var i = 0; i < pointsPerCluster; i++) {
+			points.push({
+				cluster: -1,
+				x: center.x + gaussian() * spread,
+				y: center.y + gaussian() * spread
+			});
+		}
+	}
+	
+	return points;
+}
+
+var points = makeClusters(3, 10, 0.1);
+
+circles = svg.selectAll(".point").data(points);
+
+circles.enter().append("circle")
+.attr("class", "point")
+.attr("cx", function(d) { return xScale(d.x); })
+.attr("cy", function(d) { return yScale(d.y); })
+.attr("r", 3)
+.style("fill", "green")
+.style("opacity", 0.5);
+
+lines = svg.selectAll("line").data(points);
+
+lines.enter().append("line")
+.attr("x1", function(d) { return xScale(d.x); })
+.attr("y1", function(d) { return yScale(d.y); })
+.attr("x2", function(d) { return xScale(d.x); })
+.attr("y2", function(d) { return yScale(d.y); })
+.style("stroke", "#aaa");
+
+centroids = new Array(3);
+for (var i = 0; i < centroids.length; i++) {
+	centroids[i] = { x: seededRandom(), y: seededRandom() };
+}
+
+var centroidCircles = svg.selectAll(".centroid").data(centroids);
+
+centroidCircles.enter().append("circle")
+.attr("class", "centroid")
+.attr("r", 5)
+.style("fill", "orange");
+
+centroidCircles
+.attr("cx", function(d) { return xScale(d.x); })
+.attr("cy", function(d) { return yScale(d.y); });
+
+function moveMeans() {
+	centroids.forEach(function (centroid, i) {
+		var assignedPoints = 
+			points.filter(function (point) { return point.cluster == i; });
+		
+		centroid.x = d3.mean(assignedPoints, function (point) { return point.x; });
+		centroid.y = d3.mean(assignedPoints, function (point) { return point.y; });
+	});
+	
+	lines.transition().duration(1000).attr("x2", function (point) {
+		return xScale(centroids[point.cluster].x);
+	})
+	.attr("y2", function (point) {
+		return yScale(centroids[point.cluster].y);
+	});
+	
+	centroidCircles.transition().duration(1000)
+	.attr("cx", function(d) { return xScale(d.x); })
+	.attr("cy", function(d) { return yScale(d.y); });
+}
+
+function nearestCenter(point) {
+	var nearest;
+	var shortestDistance = Number.MAX_VALUE;
+	for (var i = 0; i < centroids.length; i++) {
+		var c = centroids[i];
+		var distance = Math.sqrt( 
+			(c.x - point.x) * (c.x - point.x) +
+			(c.y - point.y) * (c.y - point.y)
+		);
+	
+		if (distance < shortestDistance) {
+			shortestDistance = distance;
+			nearest = i;
+		}
+	}
+	return nearest;
+}
+
+function findClosest() {
+
+	points.forEach(function (point) {
+		point.cluster = nearestCenter(point);
+	});
+	
+	lines.transition().duration(1000).attr("x2", function (point) {
+		return xScale(centroids[point.cluster].x);
+	})
+	.attr("y2", function (point) {
+		return yScale(centroids[point.cluster].y);
+	});
+
+}
+
+d3.select("#movemeans").on("click", moveMeans);
+d3.select("#findclosest").on("click", findClosest);
+
+
+</script>
+
+</body>
+</html>
