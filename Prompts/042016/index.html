@@ -1,0 +1,197 @@
+<html>
+<head>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Open Sans"; }
+svg { border: solid black 1px; margin: 10px; }
+.bar rect { fill: #ccc; }
+.axis path { fill: none; stroke: black;}
+.axis line { stroke: black; }
+.axis text { font-size: x-small; }
+</style>
+</head>
+<body>
+
+<p>
+	How well can people estimate quantitative values from different types of visualizations? Here are four examples. This study replicates work by Cleveland and McGill (Science, 1985) and Heer and Bostock (CHI, 2010).
+</p>
+
+<p>Open <a href="http://goo.gl/forms/GzOXGYvbcF">http://goo.gl/forms/GzOXGYvbcF</a> in a browser window.</p>
+
+<!-- <p>Open <a href="https://docs.google.com/forms/d/1cnLFnwj-V0iW5FkTtX8zeB8zv4qxWtOfYak9Nbjv9Fk/viewform">this form</a> in another window.</a> -->
+
+<p>Instructions: For each plot, compare the size of the red area to the size of the blue area. Record your estimates of the relative size of the two shapes as a percentage. For example, if you think the red area is half as big as the blue area, enter the number 50. (The values are different for each plot.)</p>
+
+<p>Plot 1: bars</p>
+<div id="bars">
+</div>
+
+<script>
+function bars(max, proportion, div) {
+var svg = div.append("p").append("svg").attr("width", 310).attr("height", 100);
+
+var values = [max, max * proportion];
+
+svg.selectAll("rect").data(values).enter().append("rect")
+.attr("x", 10).attr("y", function (d, i) { return 10 + i * 30; })
+.attr("height", 30).attr("width", function (d) { return d; })
+.style("stroke", "black").style("stroke-width", 1)
+.style("fill", function(d, i) {
+	if (i == 0) { return "#aaf"}
+	else if (i == 1) { return "#faa"; }
+	else { return "#fff"; }
+});
+}
+
+bars(250, 0.09, d3.select("#bars"));
+bars(250, 0.66, d3.select("#bars"));
+bars(250, 0.22, d3.select("#bars"));
+bars(250, 0.81, d3.select("#bars"));
+bars(250, 0.58, d3.select("#bars"));
+
+</script>
+
+<p>Plot 2: shifted bars</p>
+
+<div id="offsetbars">
+</div>
+
+<script>
+function shiftedBars (max, offsets, proportion, div) {
+var svg = div.append("p").append("svg").attr("width", 380).attr("height", 100);
+
+var values = [max, max * proportion];
+
+svg.selectAll("rect").data(values).enter().append("rect")
+.attr("x", function (d, i) { return offsets[i]; })
+.attr("y", function (d, i) { return 10 + i * 30; })
+.attr("height", 30).attr("width", function (d) { return d; })
+.style("stroke", "black").style("stroke-width", 1)
+.style("fill", function(d, i) {
+	if (i == 0) { return "#aaf"}
+	else if (i == 1) { return "#faa"; }
+	else { return "#fff"; }
+});
+}
+
+shiftedBars(250, [10, 120], 0.61, d3.select("#offsetbars"));
+shiftedBars(250, [10, 156], 0.18, d3.select("#offsetbars"));
+shiftedBars(250, [10, 63], 0.91, d3.select("#offsetbars"));
+shiftedBars(250, [10, 20], 0.22, d3.select("#offsetbars"));
+shiftedBars(250, [10, 59], 0.97, d3.select("#offsetbars"));
+
+</script>
+
+
+<p>Plot 3: circles</p>
+
+<div id="circles">
+</div>
+
+<script>
+function circles (max, proportion, div) {
+var svg = div.append("p").append("svg").attr("width", 300).attr("height", 100);
+
+var values = [max, max * proportion];
+
+svg.selectAll("circle").data(values).enter().append("circle")
+.attr("cx", function (d, i) { return 70 + i * 70; })
+.attr("cy", function (d, i) { return 50; })
+.attr("r", function (d) { return 2 * Math.sqrt(d); })
+.style("stroke", "black").style("stroke-width", 1)
+.style("fill", function(d, i) {
+	if (i == 0) { return "#aaf"}
+	else if (i == 1) { return "#faa"; }
+	else { return "#fff"; }
+});
+}
+
+circles(250, 0.63, d3.select("#circles"));
+circles(250, 0.18, d3.select("#circles"));
+circles(250, 0.82, d3.select("#circles"));
+circles(250, 0.06, d3.select("#circles"));
+circles(250, 0.22, d3.select("#circles"));
+
+</script>
+
+<p>Plot 4: pie chart</p>
+
+<div id="wedges">
+</div>
+
+<script>
+function wedges(max, proportion, div) {
+var svg = div.append("p").append("svg").attr("width", 190).attr("height", 190)
+	.append("g").attr("transform", "translate(95, 95)");
+
+var values = [max, max * proportion, 635 - (max + max * proportion)];
+
+var arc = d3.svg.arc()
+    .outerRadius(190 / 2 - 10)
+    .innerRadius(0);
+
+var pie = d3.layout.pie()
+    .sort(null);
+    //.value(function(d) { return d; });
+
+var g = svg.selectAll(".arc")
+      .data(pie(values))
+    .enter().append("g")
+      .attr("class", "arc");
+
+ g.append("path")
+ .attr("d", arc)
+.style("stroke", "black").style("stroke-width", 1)
+ .style("fill", function(d, i) {
+	if (i == 0) { return "#aaf"}
+	else if (i == 1) { return "#faa"; }
+	else { return "#fff"; }
+});
+}
+
+wedges(250, 0.65, d3.select("#wedges"));
+wedges(250, 0.26, d3.select("#wedges"));
+wedges(250, 0.79, d3.select("#wedges"));
+wedges(250, 0.03, d3.select("#wedges"));
+wedges(250, 0.95, d3.select("#wedges"));
+
+</script>
+
+<p>Plot 5: color</p>
+<div id="colors">
+</div>
+
+<script>
+function colors(max, proportion, div) {
+var svg = div.append("p").append("svg").attr("width", 310).attr("height", 100);
+
+var blueScale = d3.scale.linear().domain([0, max]).range(["#fff", "#00f"]);
+var redScale = d3.scale.linear().domain([0, max]).range(["#fff", "#f00"]);
+
+var values = [max, max * proportion];
+
+svg.selectAll("rect").data(values).enter().append("rect")
+.attr("y", 10).attr("x", function (d, i) { return 10 + i * 55; })
+.attr("height", 50).attr("width", 50)
+.style("stroke", "black").style("stroke-width", 1)
+.style("fill", function(d, i) {
+	if (i == 0) { return blueScale(d); }
+	else if (i == 1) { return redScale(d); }
+	else { return "#fff"; }
+});
+}
+
+colors(250, 0.87, d3.select("#colors"));
+colors(250, 0.47, d3.select("#colors"));
+colors(250, 0.17, d3.select("#colors"));
+colors(250, 0.06, d3.select("#colors"));
+colors(250, 0.71, d3.select("#colors"));
+
+</script>
+
+
+
+</body>
+</html>
