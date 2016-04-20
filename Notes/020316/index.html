@@ -12,7 +12,7 @@
 		stroke: #00f;
 		stroke-width: 5;
 	}
-	path { stroke: #f00; stroke-width: 10; fill: #aaa;}
+	path { stroke: #f00; stroke-width: 1; fill: #aaa;}
 	/* Opacity is a useful tool to show overlapping shapes and indicate data density */
 	rect { opacity: 0.25; }
 	</style>
@@ -23,32 +23,41 @@
 	<div>
 		SVG is an XML specification of vector graphics. Visual elements are represented as tags, which have styles and attributes. Here's a <a href="http://www.w3schools.com/svg/">reference</a> on SVG that includes the basic shape elements along with filters (blur! shadows!), animations, and transformations.
 	</div>
+
 	<div>
 		1. Polylines. SVG interprets the <tt>points</tt> attribute as a string containing at least one pair of x,y coordinates. Coordinates can be integers or floating point numbers. Commas between coordinates are optional, but helpful for (human) readers. The order of points determines where the line goes and what the shape of the fill looks like. Try reversing the middle two coordinates.
-<svg height="400" width="400">
-<polyline id="polyline1" points="10,10 100 100,10 100 100,10" />
-</svg>
+		
+		<svg height="400" width="400">
+			<polyline id="polyline1" points="10,10 100,100 10,100 100,10 50 50" />
+		</svg>
+
 	</div>
+
 	<div>
 		2. Paths. This is the most complicated SVG element, but also one of the most useful. It contains <a href="https://www.w3.org/TR/SVG/paths.html#PathData">a tiny programming language</a>. Uppercase commands specify absolute coordinates, lowercase commands specify offsets from the current position, wherever that is.
 		This is not unlike the <a href="http://www.calormen.com/jslogo/">LOGO</a> programming language.
-<svg height="400" width="400">
-<path id="path1" d="M 100,100 L 200,100 200,200 l -100,0 Z" />
-</svg>
+		<svg height="400" width="400">
+		<path id="path1" d="M 100,100 L 200,100 200,200 l -100,0 Z" />
+		</svg>
+
 	</div>
 	<div>
 		3. Transformations are another useful (but a bit tricky) tool. <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Basic_Transformations">Here's a reference</a>. Any SVG element can have a <tt>transform</tt> attribute. To apply the same transform on multiple tags nest them inside a <tt>&lt;g&gt;</tt> tag. Use <tt>scale(factor)</tt> to stretch a shape. Use <tt>translate(x,y)</tt> to move a shape. Use <tt>rotate(degrees)</tt> to rotate a shape. Your <tt>transform</tt> attribute can contain more than one of these. The order of operations matters. Guessing what will happen can be difficult. Try several combinations and see what you get.
-<svg height="400" width="400">
-<rect x="100" y="100" height="100" width="100" />
-	<g transform="translate(105,0)">
-<rect x="100" y="100" height="100" width="100" />
-<rect x="100" y="100" height="100" width="100" transform="translate(20,20)" />
-</g>
-</svg>
-	</div>
-	
-	<h3>Discussion: Minard's Map</h3>
-	<div>Edward Tufte popularized <a href="https://en.wikipedia.org/wiki/File:Minard.png">this map by Charles Minard of Napoleon's disastrous Russian invasion</a> as the greatest visual presentation of data ever. How many different variables is Minard presenting? What is he choosing NOT to present? (Is this actually a map?) What elements would you use to copy this "carte figurative" in SVG?
+		
+		<svg height="400" width="400">
+
+			<rect x="100" y="100" height="100" width="100" />		
+
+			<g transform="translate(105,0)">
+				<rect x="100" y="100" height="100" width="100" />
+				<rect x="100" y="100" height="100" width="100" transform="translate(30,20)" />
+			</g>
+
+		</svg>
+			</div>
+			
+			<h3>Discussion: Minard's Map</h3>
+			<div>Edward Tufte popularized <a href="https://en.wikipedia.org/wiki/File:Minard.png">this map by Charles Minard of Napoleon's disastrous Russian invasion</a> as the greatest visual presentation of data ever. How many different variables is Minard presenting? What is he choosing NOT to present? (Is this actually a map?) What elements would you use to copy this "carte figurative" in SVG?
 	</div>
 </body>
 </html>

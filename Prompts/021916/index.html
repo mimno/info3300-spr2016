@@ -34,8 +34,17 @@ var worldObjects;
 d3.json("world-50m.json", function(error, world) {
 	worldObjects = world;
 	
-	
+	if (error) {console.log(error);}
+	var countries = topojson.feature(world, world.objects.countries).features;
+
+	countries.forEach(function (country) {
+		
+	});
+
+
 });
+
+console.log("after json");
 
 </script>
 

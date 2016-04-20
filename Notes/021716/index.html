@@ -3,12 +3,7 @@
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	<style>
-	body { font-family: "Open Sans"; }
-	div { margin: 30px; }
-	svg { background-color: #eee; }
-	.axis path { fill: none; stroke: black; }
-	.axis line { stroke: black; }
-	.axis text { font-size: 10pt; }
+	
 	path.outline { fill: none; stroke-width: 5; stroke: white; }
 	path.plot { fill: none; stroke-width: 3; }
 	</style>
@@ -46,14 +41,14 @@ var yScale = d3.scale.linear().domain([0, 900]).range([height - padding, 0]);
 //  books don't come in 0.5 intervals. How can we set the correct number?
 // This is one way, but try modifying the domain of the x scale and looking
 //  for other ways to specify tick mark locations in the d3 documentation.
-var xAxis = d3.svg.axis().scale(xScale).orient("bottom")
+/*var xAxis = d3.svg.axis().scale(xScale).orient("bottom")
 .ticks(5);
 var yAxis = d3.svg.axis().scale(yScale).orient("left");
 
 svg.append("g").attr("transform", "translate(0," + (height - padding) + ")").attr("class", "axis")
 .call(xAxis);
 svg.append("g").attr("transform", "translate(" + padding + ",0)").attr("class", "axis")
-.call(yAxis);
+.call(yAxis);*/
 
 // Create a d3 line() function. This function will take an array of
 //  data objects and return a path through a series of x,y pixel coordinates.
@@ -74,7 +69,7 @@ svg.append("path").attr("d", ukLine(harryPotterPages))
 svg.append("path").attr("d", ukLine(harryPotterPages))
 .attr("class", "plot").attr("stroke", "red");
 
-var usLine = d3.svg.line()
+/*var usLine = d3.svg.line()
 .x(function (d) { return xScale(d.book); })
 .y(function (d) { return yScale(d.us); });
 
@@ -96,15 +91,15 @@ svg.append("path").attr("d", usLine(harryPotterPages))
 //  because our eyes have trouble distinguishing variation from the 
 //  constitutent streams.
 
-var ukArea = d3.svg.area()
+/*var ukArea = d3.svg.area()
 .x(function (d) { return xScale(d.book); })
 .y0(function (d) { return yScale(0); })
-.y1(function (d) { return yScale(d.uk); });
+.y1(function (d) { return yScale(d.uk); });*/
 
-svg.append("path").attr("d", ukArea(harryPotterPages))
+/*svg.append("path").attr("d", ukArea(harryPotterPages))
 .style("fill", "red")
 .style("opacity", 0.25)
-.style("stroke", "red");
+.style("stroke", "red");*/
 
 
 </script>
