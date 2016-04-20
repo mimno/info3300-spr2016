@@ -1,0 +1,273 @@
+<html>
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Open Sans"; }
+svg { }
+line.axis { stroke: #ddd; }
+text.point { font-size: xx-small; opacity: 0.75; }
+</style>
+</head>
+<body>
+<h3>Prompt for Wed, April 8. Where should you live? Multi-dimensional scaling.</h3>
+
+<p>Chris Ingraham ranks counties by <a href="https://www.washingtonpost.com/news/wonk/wp/2015/08/17/every-county-in-america-ranked-by-natural-beauty/?tid=a_inl">natural amenities</a> using a formula <a href="http://www.ers.usda.gov/data-products/natural-amenities-scale.aspx">developed by USDA</a>. He has since <a href="https://www.washingtonpost.com/news/wonk/wp/2016/03/08/why-im-moving-to-the-place-i-called-americas-worst-place-to-live/">moved to Red Lake County, MN</a></p>
+
+<div id="buttons"><button id="iterate">Iterate</button></div>
+<div id="display">
+	<svg></svg>
+</div>
+
+<script>
+var height = 400;
+var width = 400;
+var padding = 30;
+
+var embeddingVectors = [];
+var matrix;
+
+var texts;
+
+d3.select("#iterate").on("click", powerIteration);
+
+var svg = d3.select("svg").attr("height", height).attr("width", width);
+var xScale = d3.scale.linear().domain([-2, 2]).range([0, width]);
+var yScale = d3.scale.linear().domain([-2, 2]).range([height, 0]);
+
+svg.append("line").attr("class", "axis")
+.attr("x1", xScale(0))
+.attr("x2", xScale(0))
+.attr("y1", yScale(-100))
+.attr("y2", yScale(100));
+
+svg.append("line").attr("class", "axis")
+.attr("x1", xScale(-100))
+.attr("x2", xScale(100))
+.attr("y1", yScale(0))
+.attr("y2", yScale(0));
+
+function showMatrix(matrix) {
+	for (var row = 0; row < matrix.length; row++) {
+		console.log(matrix[row]);
+	}
+}
+
+function innerProduct(x, y) {
+	if (x.length != y.length) { console.log("vectors are not the same length"); }
+	var sum = 0.0;
+	for (var i = 0; i < x.length; i++) {
+		sum += x[i] * y[i]
+	}
+	return sum;
+}
+
+function multiply(matrix, vector) {
+	var product = new Array(vector.length);
+	
+	for (var row = 0; row < matrix.length; row++) {
+		product[row] = innerProduct(matrix[row], vector);
+	}
+	
+	return product;
+}
+
+function normalize(vector) {
+	var length = Math.sqrt(d3.sum(vector, function (x) { return x * x; }));
+	return vector.map(function (x) { return x / length; });
+}
+
+// Make y orthogonal to x
+function orthogonalize(x, y) {
+	var scale = innerProduct(x, y) / innerProduct(x, x);
+	for (var i = 0; i < y.length; i++) {
+		y[i] -= x[i] * scale;
+	}
+}
+
+function diff(a, b) {
+	var sumDiff = 0.0;
+	for (var i = 0; i < a.length; i++) {
+		for (var j = 0; j < a[i].length; j++) {
+			sumDiff += Math.abs(a[i][j] - b[i][j]);
+		}
+	}
+	return sumDiff;
+}
+
+function powerIteration () {
+	var delay = 0;
+	
+	var newMatrix = [ normalize(embeddingMatrix[0]), normalize(embeddingMatrix[1])];		
+	
+	newMatrix[0] = multiply(matrix, newMatrix[0]);
+	newMatrix[1] = multiply(matrix, newMatrix[1]);
+	
+	orthogonalize(newMatrix[0], newMatrix[1]);
+
+	var change = diff(embeddingMatrix, newMatrix);
+	console.log(change);
+	embeddingMatrix = newMatrix;	
+	
+	xScale = d3.scale.linear()
+	.domain(d3.extent(embeddingMatrix[0]))
+	.range([padding, width - padding]);
+	
+	yScale = d3.scale.linear()
+	.domain(d3.extent(embeddingMatrix[1]))
+	.range([height - padding, padding]);
+	
+	texts
+	.attr("x", function (d, i) {
+		return xScale(embeddingMatrix[0][i]);
+	})
+	.attr("y", function (d, i) {
+		return yScale(embeddingMatrix[1][i]);
+	});	
+	
+}
+
+function toMatrix (rawData, selectedFields) {
+	var matrix = [];
+	
+	rawData.forEach(function (d) {
+		var vector = [];
+		
+		selectedFields.forEach(function (field) {
+			if (! d[field]) {
+				console.log(d, field);
+			}
+			vector.push(Number(d[field]));
+		});
+		
+		matrix.push(vector);
+	});
+	
+	return matrix;
+}
+
+/* Return a vector of length n, initialized with samples from a Gaussian distribution */
+var rnorm = d3.random.normal();
+function normalVector (n) {
+    var x = new Array(n);
+    for (var i = 0; i < n; i++) { x[i] = rnorm(); }
+    return x;
+}
+
+/* Return an array of the specified length, initialized to all zero */
+function zeros (n) {
+    var x = new Array(n);
+    for (var i = 0; i < n; i++) {
+        x[i] = 0.0;
+    }
+    return x;
+}
+
+/* Return the square of the Euclidean distance between two vectors.
+ This is just the Pythagorean theorem extended to multiple dimensions. */
+function squaredDistance(x, y) {
+    var sum = 0.0;
+    for (var dim = 0; dim < x.length; dim++) {
+        sum += (x[dim] - y[dim]) * (x[dim] - y[dim]);
+    }
+    return sum;
+}
+
+/* Calculate the distance between each pair of rows in the input data.
+    Then shift it so that the mean of every row and column is zero.
+*/
+function distanceMatrix(matrix) {
+	var numPoints = matrix.length;
+	
+	var distanceMatrix = new Array(numPoints);
+	for (var i = 0; i < numPoints; i++) {
+	    distanceMatrix[i] = new Array(numPoints);
+	    for (var j = 0; j < numPoints; j++) {
+	        if (j > i) {
+	            distanceMatrix[i][j] = squaredDistance(matrix[i], matrix[j]);
+	        }
+	        else if (j == i) {
+				// The distance from a point to itself is zero
+	            distanceMatrix[i][i] = 0.0;
+	        }
+	        else {
+				// Distance is symmetric, so don't bother recalculating
+				//  pairs we already know about
+	            distanceMatrix[i][j] = distanceMatrix[j][i];
+	        }
+	    }
+	}
+
+	var colMeans = zeros(numPoints);
+	for (var row = 0; row < numPoints; row++) {
+	    for (var col = 0; col < numPoints; col++) {
+	        colMeans[col] += distanceMatrix[row][col];
+	    }
+	}
+
+	for (var col = 0; col < numPoints; col++) {
+	    colMeans[col] /= numPoints;
+	}
+
+	var rowMeans = zeros(numPoints);
+	for (var row = 0; row < numPoints; row++) {
+		var rowMean = (d3.sum(distanceMatrix[row]) - d3.sum(colMeans)) / numPoints;
+	    for (var col = 0; col < numPoints; col++) {
+			distanceMatrix[row][col] -= rowMean + colMeans[col];
+			distanceMatrix[row][col] *= -0.5;
+		}
+	}
+	
+	return distanceMatrix;
+}
+
+function mds(selectedFields) {
+	
+	var numPoints = amenities.length;
+
+	matrix = distanceMatrix(toMatrix(amenities, selectedFields));
+	
+	// Initialize randomly
+	embeddingMatrix = [ normalVector(numPoints), normalVector(numPoints) ];
+		
+	texts
+	.attr("x", function (d, i) {
+		return xScale(embeddingMatrix[0][i]);
+	})
+	.attr("y", function (d, i) {
+		return yScale(embeddingMatrix[1][i]);
+	});
+	
+	
+}
+
+var amenities;
+var propertyNames;
+
+d3.csv("amenities.csv", function (error, data) {
+	amenities = data.filter(function (d) {
+		return Number(d["RuralUrban"]) == 0 &&
+		(d["STATE"] == "CA" || 
+		d["STATE"] == "NY" ||
+		d["STATE"] == "WA" ||
+		d["STATE"] == "FL");
+	});
+	
+	texts = svg.selectAll("text").data(amenities);
+	
+	texts.enter().append("text").attr("class", "point")
+	.text(function (d) { return d["County name"] + "," + d["STATE"]; });
+	
+	propertyNames = Object.getOwnPropertyNames(amenities[0]);
+	
+	console.log("These are the properties defined:");
+	console.log(propertyNames);
+	
+	//mds(["JanTemp", "JanSun", "JulyTemp", "JulyHumidity", "Topography", "WaterArea"]);
+	mds(["StandJanTemp", "StandJanSun", "StandJulTemp", "StandJulHumidity", "StandTopo", "StandWaterArea"]);
+});
+
+</script>
+
+</body>
+</html>

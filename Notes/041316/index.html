@@ -11,19 +11,21 @@ svg { border: solid black 1px; }
 .axis line { stroke: black; }
 .axis text { font-size: x-small; }
 path.residual { stroke: black; opacity: 0.2; stroke-width: 5; }
-path.square { opacity: 0.0; }
+path.square { fill: black; opacity: 0.0; }
 </style>
 </head>
 <body>
 
-<h3>Notes for Mon, Apr 11. <a href="http://en.wikipedia.org/wiki/Simple_linear_regression">Simple Linear Regression</a> and <a href="http://en.wikipedia.org/wiki/Least_squares">Least Squares</a>.</h3>
+<h3>Prompt for Wed, Apr 13. <a href="http://en.wikipedia.org/wiki/Simple_linear_regression">Simple Linear Regression</a> and <a href="http://en.wikipedia.org/wiki/Least_squares">Least Squares</a>.</h3>
 
 <p>Motivation: scroll to the bottom of <a href="http://fivethirtyeight.com/features/trumps-new-magic-number-is-40-percent-of-the-vote/">this 538 article</a>.
 </p>
 
+<div><button id="generate">Generate point</button></div>
+
 <div id="plot"></div>
 
-<p>Data science gotchas: <a href="http://fusion.net/story/287592/internet-mapping-glitch-kansas-farm/">the IP "null island" in Kansas</a>.</p>
+<p>Updated! <a href="http://fusion.net/story/290772/ip-mapping-maxmind-new-us-default-location/">the IP "null island" is now a lake near Wichita, Kansas</a>.</p>
 
 <script>
 
@@ -64,6 +66,11 @@ function generateLinear(x, slope, intercept, noise) {
 var realSlope = 0.5;
 var realIntercept = 0.0;
 
+d3.select("#generate").on("click", function () {
+	var point = generateLinear(gaussian(), realSlope, realIntercept, 1.2);
+	addPoint(point);
+})
+
 var modelLine = svg.append("line").attr("class", "realModel")
 .attr("x1", xScale(-3))
 .attr("y1", yScale(realSlope * -3 + realIntercept))
@@ -75,9 +82,7 @@ var modelLine = svg.append("line").attr("class", "realModel")
 
 var model = leastSquares([]);
 
-var points = [{"x":-1.2330973279191326,"y":-0.6994248342294702},{"x":1.7996387667207998,"y":1.1725462227268648},{"x":-1.3395548786759093,"y":-0.6176675455342835},{"x":-0.5800165358802124,"y":-0.7645341704142388},{"x":-2.3384514729522388,"y":-0.9678576437556518},{"x":-0.09651836507608529,"y":0.2987814878084641},{"x":-0.43080032781660527,"y":-0.45276217737047897},{"x":-2.198133135472373,"y":-1.002058273530259},{"x":-1.1146222404003339,"y":-0.536029602728414},{"x":-1.0686123793105093,"y":-0.5487531128780339}];
-
-points.push({x: 2, y: -2});
+var points = [];
 
 // calculate the difference between predicted y and actual y
 calculateErrors(points, model);
@@ -119,7 +124,7 @@ function maxError () {
 	});
 }
 
-var error = absoluteError;
+var error = squaredError;
 
 var modelText = svg.append("text")
 .attr("id", "status")
@@ -134,8 +139,39 @@ svg.on("click", function() {
 	var clickX = xScale.invert(mouseXY[0]);
 	var clickY = yScale.invert(mouseXY[1]);	
 	
+	addPoint({x: clickX, y: clickY});
+});
+
+function addPoint(point) {
+	
+	points.push(point);
+	
+	// update the errors
+	calculateErrors(points, model);
+
+	circles = svg.selectAll("circle").data(points);
+	
+	circles.enter()
+	.append("circle")
+	.attr("cx", function (d) { return xScale(d.x); })
+	.attr("cy", function (d) { return yScale(d.y); })
+	.attr("r", 2)
+	.style("opacity", "0.3");
+
+	residuals = svg.selectAll("path.residual").data(points);
+	
+	residuals.enter()
+	.append("path")
+	.attr("class", "residual")
+	.attr("d", errorLine);
+
+	squares = svg.selectAll("path.square").data(points).enter()
+	.append("path")
+	.attr("class", "square")
+	.attr("d", errorSquare);
+	
 	// Calculate a new slope
-	model.slope = clickY / clickX;
+	model = leastSquares(points);
 	
 	// update the errors
 	calculateErrors(points, model);
@@ -145,14 +181,14 @@ svg.on("click", function() {
 	rounder(error()));
 	
 	// Move the regression line
-	regressionLine
+	regressionLine.transition().duration(500)
 	.attr("y1", yScale(model.slope * -3 + model.intercept))
 	.attr("y2", yScale(model.slope * 3 + model.intercept));
 		
 	// Change the squares for each point
-	residuals.attr("d", errorLine)
-	squares.attr("d", errorSquare);
-});
+	residuals.transition().duration(500).attr("d", errorLine)
+	squares.transition().duration(500).attr("d", errorSquare);
+}
 	
 var regressionLine = svg.append("line")
 .attr("class", "estimated")
@@ -192,6 +228,10 @@ function leastSquares(points) {
 	var model = { intercept: 0, slope: 0 };
 	
 	if (points.length == 0) { return model; }
+	if (points.length == 1) {
+		model.slope = points[0].y / points[0].x;
+		return model;
+	}
 
 	var meanX = d3.mean(points, function (d) { 
 		return d.x;
