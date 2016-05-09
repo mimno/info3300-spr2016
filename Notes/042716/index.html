@@ -1,0 +1,215 @@
+
+<html>
+<head>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Open Sans"; }
+svg { border: solid black 1px; }
+line.axis { stroke: #ddd; }
+text.innerProduct { font-size: xx-small; }
+</style>
+</head>
+<body>
+
+<h3>Notes for Wed, Apr 27. Classification and the Perceptron Algorithm. Support Vector Machines.</h3>
+
+<p>We will be replicating the simplest model in this <a href="http://playground.tensorflow.org/">Neural Network toy</a>.</p>
+
+<div id="chart"></div>
+
+<p>Key points from Monday:
+<ul>
+	<li>We can represent data elements (an object with fields) as vectors (a list of numbers).</li>
+	<li>Regression learns a function that predicts a number. Classification works the same way, but predicts a category.</li>
+	<li>We can model a decision boundary between classes by adding another vector, a classifier.</li>
+	<li>We don't model the boundary itself &mdash; we model the line perpendicular to the boundary.</li>
+	<li>The "decision" is based on the product of a data vector and a classifier vector: a negative product means we predict -1, a positive product means we predict +1.</li>
+	<li>A classifier will make good predictions if the classification vector is "pointing" towards the positive examples and away from the negative examples.</li>
+</ul>
+</p>
+
+<p>Questions for Wednesday:
+<ul>
+	<li>How can we find a good classification vector automatically?</li>
+	<li>Does it matter how quickly we adapt to new information?</li>
+	<li>Are some data points more informative than others?</li>
+</ul>
+</p>
+
+<script>
+
+var classifier = { x: 1, y: 1 };
+
+var height = 600;
+var width = 600;
+
+
+var svg = d3.select("#chart").append("svg").attr("height", height).attr("width", width);
+var xScale = d3.scale.linear().domain([-5, 5]).range([0, width]);
+var yScale = d3.scale.linear().domain([-5, 5]).range([height, 0]);
+
+svg.append("line").attr("class", "axis")
+.attr("x1", xScale(0))
+.attr("x2", xScale(0))
+.attr("y1", yScale(-100))
+.attr("y2", yScale(100));
+
+svg.append("line").attr("class", "axis")
+.attr("x1", xScale(-100))
+.attr("x2", xScale(100))
+.attr("y1", yScale(0))
+.attr("y2", yScale(0));
+
+function prediction(point) {
+	return point.x * classifier.x + 
+	point.y * classifier.y;
+}
+
+var realColor = function(point) {
+	if (point.label > 0) {
+		return "#f59322";
+	}
+	else {
+		return "#0877bd";
+	}
+};
+
+var predictedColor = function(point) {
+	if (prediction(point) > 0) {
+		return "#f59322";
+	}
+	else {
+		return "#0877bd";
+	}
+};
+
+var formatter = d3.format(".3f");
+var innerProductText = function (point) {
+	return formatter( prediction(point) );
+};
+
+var points, texts, classifierLine, classRegion;
+var trainingData = [];
+
+var pointsPerClass = 20;
+
+var normal = d3.random.normal();
+for (var i = 0; i < pointsPerClass; i++) {
+	trainingData.push({
+		x: normal() - 1.0,
+		y: normal() + 1.0,
+		label: 1, id: i
+	});
+}
+for (var i = 0; i < pointsPerClass; i++) {
+	trainingData.push({
+		x: normal() + 1.0,
+		y: normal() - 1.0,
+		label: -1,
+		id: pointsPerClass + i
+	});
+}
+
+points = svg.selectAll("circle")
+.data(trainingData).enter().append("circle")
+.attr("id", function (point, i) { return "p"+i; })
+.attr("cx", function(point) { return xScale(point.x); })
+.attr("cy", function(point) { return yScale(point.y); })
+.attr("r", 5)
+.style("fill", realColor)
+.style("stroke", predictedColor)
+.style("stroke-width", 2)
+.on("click", update);
+  
+texts = svg.selectAll("text.innerProduct")
+.data(trainingData).enter().append("text")
+.attr("class", "innerProduct")
+.attr("x", function(point) { return xScale(point.x) + 8; })
+.attr("y", function(point) { return yScale(point.y); })
+.style("fill", predictedColor)
+.style("pointer-events", "none")
+.text(innerProductText);
+
+classifierLine = svg.append("line")
+.attr("x1", xScale(0)).attr("y1", yScale(0))
+.attr("x2", xScale(classifier.x)).attr("y2", yScale(classifier.y))
+.style("stroke", "blue")
+.style("opacity", 0.9)
+.style("stroke-width", 3);
+
+classRegion = svg.append("line")
+.attr("x1", xScale(0))
+.attr("y1", yScale(0))
+.attr("x2", xScale(100 * classifier.x))
+.attr("y2", yScale(100 * classifier.y))
+.style("stroke", "blue")
+.style("opacity", 0.2)
+.style("stroke-width", 3000)
+.style("pointer-events", "none");
+
+/*
+classifier.x = d3.mean(trainingData,
+	function (point) { 
+		return point.x * point.label;
+	});
+
+classifier.y = d3.mean(trainingData,
+	function (point) { 
+		return point.y * point.label;
+	});;
+
+updateDisplay();
+*/
+
+var pointsSoFar = 0;
+
+// What happens when we consider a training point?
+//  Users can click individual points:
+function update(point) {
+	
+	var circle = d3.select("#p" + point.id);
+    
+	pointsSoFar ++;
+	
+	// What effect does this parameter have?
+	var learningRate = 0.3 *
+	(1.0 / pointsSoFar);
+
+	if ( prediction(point) *
+	point.label < 1.0/* how do we decide whether we should do something? */ ) {
+
+		// Update the current model (classifier)
+		classifier.x +=
+		learningRate * point.label * point.x;
+
+		classifier.y +=
+		learningRate * point.label * point.y;
+	  
+	}
+
+	updateDisplay();
+}
+
+function updateDisplay() {
+ 	classifierLine.transition().duration(1000)
+    .attr("x2", xScale(classifier.x))
+	.attr("y2", yScale(classifier.y));
+	
+	classRegion.transition().duration(1000)
+	.attr("x2", xScale(100 * classifier.x))
+	.attr("y2", yScale(100 * classifier.y))
+	
+    points.transition().duration(1000)
+    .style("stroke", predictedColor);
+	
+	texts.transition().delay(1000)
+	.style("fill", predictedColor)
+	.text(innerProductText);
+}
+
+</script>
+
+</body>
+</html>

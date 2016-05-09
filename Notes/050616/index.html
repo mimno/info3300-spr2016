@@ -1,0 +1,271 @@
+<html>
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Playfair Display";  }
+svg { border: solid black 3px; }
+.axis path { stroke: #ddd; fill: none; }
+.axis line { stroke: #ddd; fill: none; }
+.axis text { fill: #ddd; font-size: xx-small; }
+
+circle { opacity: 0.5; }
+
+line.a { stroke: rgb(174, 78, 87); }
+line.b { stroke: rgb(204, 161, 74); }
+
+.real {
+	stroke-width: 5;
+	opacity: 0.6;
+}
+
+.replicated {
+	stroke-width: 3;
+	opacity: 0.3;
+}
+</style>
+</head>
+<body>
+<h3>Prompt for Fri, May 6. <a href="http://en.wikipedia.org/wiki/Simple_linear_regression">Simple Linear Regression</a> and <a href="https://en.wikipedia.org/wiki/Fisher%27s_exact_test">permutation tests</a>.</h3>
+
+<p><i>Aesthetics: <a href="https://upload.wikimedia.org/wikipedia/commons/5/52/Playfair_TimeSeries-2.png">William Playfair</a></i></p>
+
+<p>
+<button id="permutation">Resample</button>
+<button id="clear">Clear</button>
+Replications: <span id="reps"></span>;
+</p>
+<p>
+	Slope difference (real): <span id="diff"></span>; 90% CI: [<span id="diff05"></span>, <span id="diff95"></span>]; p-value: <span id="pvalue"></span>
+</p>
+<div id="plot"></div>
+
+<p>Discussion: <a href="http://atlasofemotions.com/">Atlas of Emotions</a></p>
+	
+<script>
+
+var height = 500;
+var width = 500;
+
+var svg = d3.select("#plot").append("svg").attr("height", height).attr("width", width);
+
+// Get a function that will generate samples from a standard
+//  normal distribution (mean 0, std. dev. 1)
+var gaussian = d3.random.normal();
+
+var sampleNPoints = function(n, slope, error, label) {
+	var result = [];
+	for (var i = 0; i < n; i++) {
+		var x = gaussian();
+		
+		// How do we generate from this linear model?
+		var y = slope * x + error * gaussian();
+		result.push({ x: x, y: y, label: label });
+	}
+	return result;
+}
+
+// Modify these lines to run experiments
+var points = sampleNPoints(10, 0.7, 0.002, "a")
+.concat( sampleNPoints(10, 0.2, 0.3, "b") );
+
+function isA(point) { return point.label === "a"; }
+function isB(point) { return point.label === "b"; }
+
+function fill(point) { return isA(point) ? "rgb(174, 78, 87)" : "rgb(204, 161, 74)"; }
+ 
+var linearModel = function(p) {
+	var meanX = d3.mean(p, function(point) { return point.x; });
+	var meanY = d3.mean(p, function(point) { return point.y; });
+
+	var slope = d3.sum(p, function (point) { return (point.x - meanX) * (point.y - meanY); }) /
+		d3.sum(p, function (point) { return (point.x - meanX) * (point.x -meanX); })
+
+	var intercept = meanY - slope * meanX;
+	return { slope: slope, intercept: intercept };
+};
+
+var xDomain = [-3, 3];
+var yDomain = [-3, 3]
+
+var padding = 40;
+var xScale = d3.scale.linear().domain(xDomain).range([padding, width - padding]);
+var yScale = d3.scale.linear().domain(yDomain).range([height - padding, padding]);
+
+// Helper functions to be used as callbacks
+var x = function (point) { return xScale(point.x); }
+var y = function (point) { return yScale(point.y); }
+
+var ticks = [-3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
+var axes = svg.append("g").attr("class", "axis");
+
+ticks.forEach(function (tick) {
+	axes.append("line")
+	.attr("x1", xScale(xDomain[0])).attr("y1", yScale(tick))
+	.attr("x2", xScale(xDomain[1])).attr("y2", yScale(tick));
+	axes.append("line")
+	.attr("x1", xScale(tick)).attr("y1", yScale(yDomain[0]))
+	.attr("x2", xScale(tick)).attr("y2", yScale(yDomain[1]));
+	
+	axes.append("text")
+	.attr("x", xScale(xDomain[1]) + 5).attr("y", yScale(tick))
+	.text(tick);
+	axes.append("text")
+	.attr("x", xScale(tick)).attr("y", yScale(yDomain[0]) + 10)
+	.text(tick);
+});
+
+var line = function(model, label, type) {
+	svg.append("line").attr("class", label + " " + type)
+	.transition().delay(1750)
+	.attr("x1", xScale(xDomain[0])).attr("y1", yScale(xDomain[0] * model.slope + model.intercept))
+	.attr("x2", xScale(xDomain[1])).attr("y2", yScale(xDomain[1] * model.slope + model.intercept));
+}
+	
+var realCircles, realModelA, realModelB;
+var realSlopeDiff;
+var slopeDiffs = [];
+
+var formatter = d3.format(".3f");
+
+function init() {
+	slopes = [];
+	intercepts = [];
+
+	d3.selectAll("line.real").remove();
+	d3.selectAll("line.replicated").remove();
+	d3.selectAll("circle").remove();
+	slopes = [];
+	intercepts = [];
+
+	// Plot the real points
+	realCircles = svg.selectAll("circle")
+	.data(points).enter().append("circle")
+	.style("fill", fill)
+	.attr("cx", x).attr("cy", y)
+	.attr("r", 4);
+
+	// Get the best linear fits for the real data
+	realModelA = linearModel(points.filter(isA));
+	line(realModelA, "a", "real");
+	realModelB = linearModel(points.filter(isB));
+	line(realModelB, "b", "real");
+	
+	realSlopeDiff = realModelA.slope - realModelB.slope;
+	
+	d3.select("#reps").text(0);
+	d3.select("#diff").text(formatter(realSlopeDiff));
+	d3.select("#diff05").text("");
+	d3.select("#diff95").text("");
+	d3.select("#pvalue").text("");
+	
+}
+
+// For example, fifth percentile (0.05) of a list of length 20 should be index 1.
+// Related: https://gist.github.com/IceCreamYou/6ffa1b18c4c8f6aeaad2
+function percentile(list, p) {
+	var n = list.length;
+	if (p <= 1.0 / (n+1)) {
+		return list[0]
+	}
+	else if (p >= n / (n+1)) { 
+		return list[n-1];
+	}
+	else {
+		// Return a weighted combination
+		var integer = Math.floor(p * (n+1)); 
+		var fraction = (p * (n+1)) % 1;
+		console.log(integer, fraction, n);
+		return (1.0 - fraction) * list[ integer-1 ] + 
+			fraction * list[ integer ];
+	}
+}
+
+
+d3.select("#permutation").on("click", function () {
+	var randomizedPoints = [];
+	
+	var shuffledLabels = d3.shuffle(points.map(
+		function (point) { return point.label; }
+	));
+	
+	for (var i = 0; i < points.length; i++) {
+		randomizedPoints.push(
+			{ x: points[i].x, y: points[i].y, label: shuffledLabels[i] }
+		);
+	}
+	
+	// Change the labels
+	realCircles.style("opacity", 1.0); // Make them more visible
+	
+	realCircles.data(randomizedPoints).transition().delay(500).duration(500)
+	.style("fill", fill);
+	
+	var replicatedModelA = linearModel(randomizedPoints.filter(isA));
+	line(replicatedModelA, "a", "replicated");
+	
+	var replicatedModelB = linearModel(randomizedPoints.filter(isB));
+	line(replicatedModelB, "b", "replicated");
+
+	// return to real labels
+	realCircles.data(points)
+	.transition().delay(2000).duration(500)
+	.style("fill", fill);
+	
+	realCircles.transition().delay(3500)
+	.style("opacity", 0.5);
+	
+	/* Oops! Javascript doesn't sort numbers by default: http://stackoverflow.com/questions/7000851/array-sort-doesnt-sort-numbers-correctly
+	*/
+	slopeDiffs.push(replicatedModelA.slope - replicatedModelB.slope);
+	slopeDiffs.sort(function(a, b) { return a - b });
+		
+	d3.select("#reps").text(slopeDiffs.length);
+	d3.select("#diff05")
+	.transition().delay(2000)
+	.text(formatter(percentile(slopeDiffs, 0.05)));
+	
+	d3.select("#diff95")
+	.transition().delay(2000)
+	.text(formatter(percentile(slopeDiffs, 0.95)));
+	
+	var moreExtreme;
+	if (realSlopeDiff > 0.0) {
+		moreExtreme = slopeDiffs.filter(
+			function (x) {
+				return x > realSlopeDiff;
+			}
+		);
+	}
+	else {
+		moreExtreme = slopeDiffs.filter(
+			function (x) {
+				return x < realSlopeDiff;
+			}
+		);
+	}
+	
+	d3.select("#pvalue")
+	.transition().delay(2000)
+	.text(formatter(moreExtreme.length / slopeDiffs.length));
+	
+	
+});
+
+init();
+d3.select("#clear").on("click", init);
+
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

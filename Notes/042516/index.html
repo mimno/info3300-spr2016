@@ -1,0 +1,160 @@
+
+<html>
+<head>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body { font-family: "Open Sans"; }
+svg { border: solid black 1px; }
+line.axis { stroke: #ddd; }
+text.innerProduct { font-size: xx-small; }
+</style>
+</head>
+<body>
+
+<h3>Notes for Mon, Apr 25. Classification and the Perceptron Algorithms.</h3>
+
+<p>We will be replicating the simplest model in this <a href="http://playground.tensorflow.org/">Neural Network toy</a>.</p>
+
+<div id="chart"></div>
+
+<p>Another important classification problem: <a href="https://slackprop.wordpress.com/2013/06/03/on-geek-versus-nerd/">Geek vs. Nerd</a>.</p>
+
+<script>
+
+var learningRate = 1.0;
+
+var normalGenerator = d3.random.normal();
+
+var classifier = { x: 1, y: 1 };
+
+var height = 600;
+var width = 600;
+
+
+var svg = d3.select("#chart").append("svg").attr("height", height).attr("width", width);
+var xScale = d3.scale.linear().domain([-5, 5]).range([0, width]);
+var yScale = d3.scale.linear().domain([-5, 5]).range([height, 0]);
+
+svg.append("line").attr("class", "axis")
+.attr("x1", xScale(0))
+.attr("x2", xScale(0))
+.attr("y1", yScale(-100))
+.attr("y2", yScale(100));
+
+svg.append("line").attr("class", "axis")
+.attr("x1", xScale(-100))
+.attr("x2", xScale(100))
+.attr("y1", yScale(0))
+.attr("y2", yScale(0));
+
+function prediction(point) {
+	return point.x * classifier.x + 
+	point.y * classifier.y;
+}
+
+var realColor = function(point) {
+	if (point.label > 0) {
+		return "#f59322";
+	}
+	else {
+		return "#0877bd";
+	}
+};
+
+var predictedColor = function(point) {
+	if (prediction(point) > 0) {
+		return "#f59322";
+	}
+	else {
+		return "#0877bd";
+	}
+};
+
+var formatter = d3.format(".3f");
+var innerProductText = function (point) {
+	return formatter( prediction(point) );
+};
+
+var points, texts, classifierLine;
+var trainingData = [];
+
+var pointsPerClass = 20;
+
+var normal = d3.random.normal();
+for (var i = 0; i < pointsPerClass; i++) {
+	trainingData.push({ x: normal() - 1.0, y: normal() + 1.0, label: 1, id: i });
+}
+for (var i = 0; i < pointsPerClass; i++) {
+	trainingData.push({ x: normal() + 1.0, y: normal() - 1.0, label: -1, id: pointsPerClass + i });
+}
+
+points = svg.selectAll("circle").data(trainingData).enter().append("circle")
+.attr("id", function (point, i) { return "p"+i; })
+  .attr("cx", function(point) { return xScale(point.x); })
+  .attr("cy", function(point) { return yScale(point.y); })
+  .attr("r", 5)
+  .style("stroke-width", 0)
+  .style("fill", realColor)
+  .style("stroke", predictedColor)
+  .style("stroke-width", 2)
+  .on("click", update);
+  
+texts = svg.selectAll("text.innerProduct")
+.data(trainingData).enter().append("text")
+  .attr("class", "innerProduct")
+  .attr("x", function(point) { return xScale(point.x) + 8; })
+  .attr("y", function(point) { return yScale(point.y); })
+  .style("fill", predictedColor)
+  .text(innerProductText);
+
+classifierLine = svg.append("line")
+	.attr("x1", xScale(0)).attr("y1", yScale(0))
+    .attr("x2", xScale(classifier.x)).attr("y2", yScale(classifier.y))
+    .style("stroke", "blue")
+	.style("opacity", 0.1)
+	.style("stroke-width", 3000)
+	.style("pointer-events", "none");
+
+// What happens when we consider a training point?
+//  Users can click individual points:
+function update(point) {
+  var circle = d3.select("#p" + point.id);
+    
+  if ( true  /* how do we decide whether we should do something? */ ) {
+
+	  // Update the current model (classifier)
+	  classifier.x += learningRate * point.label * point.x;
+	  classifier.y += learningRate * point.label * point.y;
+	  
+  }
+
+  updateDisplay();
+};
+
+function updateDisplay() {
+ 	classifierLine.transition().duration(1000)
+    .attr("x2", xScale(classifier.x)).attr("y2", yScale(classifier.y));
+	
+    points.transition().duration(1000)
+    .style("stroke", predictedColor);
+	
+	texts.transition().delay(1000)
+	.style("fill", predictedColor)
+	.text(innerProductText);
+}
+
+// Mouse interaction with "classifier" line
+
+svg.on("click", function () {
+	var pixels = d3.mouse(this);
+	classifier = { x: xScale.invert(pixels[0]), y: yScale.invert(pixels[1]) };
+	
+	updateDisplay();
+});
+
+</script>
+
+</body>
+</html>
