@@ -10,9 +10,9 @@
 <div id="d1" class="header">Hello!</div>
 
 <!-- Here's an SVG canvas element. Note that in this file it looks like the <div> above. -->
-<svg height="200" width="200">
+<svg height="200" width="200" style="border: red solid 3px">
   <!-- Visual elements are represented by tags, which have attributes -->
-  <circle cx="30" cy="30" r="10" id="c1" />
+  <circle cx="40" cy="70" r="10" id="c1" />
 </svg>
 
 <!-- Here are two types of form inputs. -->
@@ -32,13 +32,13 @@ We will be using Javascript to manipulate element of the page.
 //  you to appreciate why we like it.
 
 // We can modify attributes of an element
-document.getElementById("d1").innerText = "Buon giorno!";
+document.getElementById("d1").innerText = "Changed Text!";
 // Note that since getElementById returns an object, we can "chain" 
 //  multiple commands.
 
 // The Document Object Model (DOM) of a web page distinguishes 
 //  between attributes and styles.
-document.getElementById("d1").style.color = "#f00";
+document.getElementById("d1").style.color = "blue";
 // Your browser's Javascript console gives you a good interface to scan
 //  the attributes and styles available to you.
 
@@ -51,17 +51,17 @@ document.getElementById("d1").style.color = "#f00";
 var circle = document.getElementById("c1");
 // But we can't directly set properties like we did with the regular
 //  HTML element.
-circle.setAttribute("cx", 100);
+//circle.setAttribute("cx", 100);
 
 //circle.cy = 150; <-- Doesn't work!
-circle.setAttribute("cy", 150);
+//circle.setAttribute("cy", 150);
 // The "x" axis is left to right, but the "y" axis is top to bottom -- 
 //  the opposite of standard Cartesian coordinates, but ordinary for graphics.
 
 // Styles work just like standard HTML, but the names of the styles
 //  may not be what you expect.
-circle.style.fill = "#f00";
-circle.style.stroke = "#000";
+circle.style.fill = "green";
+circle.style.stroke = "green";
 
 
 // During class we noticed that I had accidentally used a variable "c1"

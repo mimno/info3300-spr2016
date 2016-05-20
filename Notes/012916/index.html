@@ -121,6 +121,7 @@ display(3.0, getType);
 	</div>
 	<div>
 		Functions remember the values of variables at the time they were created.
+		
 		<script>
 		var favoriteColor = "blue";
 		function colorGenerator(color) {
@@ -128,8 +129,10 @@ display(3.0, getType);
 		}
 		var getColor = colorGenerator(favoriteColor);
 		favoriteColor = "green";
+
+		window.alert(getColor);
 		
-		// What is getColor() ?
+		// What is getColor() ? It is blue because this is a closure. Remember, this is a functional language.
 		</script>
 	</div>
 </body>
